@@ -342,7 +342,7 @@
             <div id="syncPanel">
                 <p>创建一个同步房间，其他设备输入相同房间号即可实时同步数据。</p>
                 <form id="syncForm" style="margin-top:15px;">
-                    <div class="form-group"><label>房间号（4位数字）</label><input type="text" id="roomCode" placeholder="例如：1234" maxlength="4" pattern="\\d{4}" required></div>
+                    <div class="form-group"><label>房间号（4位数字）</label><input type="text" id="roomCode" placeholder="例如：1234" maxlength="4" pattern="[0-9]{4}" required></div>
                     <button type="submit" class="btn btn-sync" style="width:100%;">🚀 进入房间并同步</button>
                 </form>
             </div>
