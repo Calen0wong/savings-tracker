@@ -16,14 +16,40 @@
         h1 { color: white; text-align: center; margin-bottom: 10px; }
         .user-bar {
             background: rgba(255,255,255,0.15);
-            padding: 10px 15px;
+            padding: 12px 15px;
             border-radius: 25px;
             text-align: center;
             color: white;
             margin-bottom: 20px;
             font-size: 0.9rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        .user-bar a { color: #ffd700; text-decoration: underline; cursor: pointer; margin: 0 8px; }
+        .user-bar a { color: #ffd700; text-decoration: underline; cursor: pointer; }
+        .btn-join {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(255, 107, 53, 0.4);
+            transition: all 0.3s;
+            animation: pulse 2s infinite;
+        }
+        .btn-join:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(255, 107, 53, 0.5);
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
         .section {
             background: white;
             border-radius: 12px;
@@ -165,9 +191,9 @@
     <div class="container">
         <h1>💵 存钱小工具</h1>
         <div class="user-bar">
-            我是: <strong id="displayName">我</strong> | 
-            <a onclick="showUserModal()">改名</a> | 
-            <a onclick="showJoinModal()">加入计划</a>
+            <span>我是: <strong id="displayName">我</strong></span>
+            <a onclick="showUserModal()">改名</a>
+            <button class="btn-join" onclick="showJoinModal()">👋 加入家庭计划</button>
         </div>
         
         <div class="stats-grid">
