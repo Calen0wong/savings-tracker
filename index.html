@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>💵 存钱小工具 - 完美版</title>
+<title>💵 存钱小工具 - 配置版</title>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
 <style>
@@ -13,6 +13,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 h1{color:white;text-align:center;margin-bottom:10px;font-size:1.8rem}
 .status-bar{background:rgba(255,255,255,0.2);padding:8px 15px;border-radius:20px;margin-bottom:15px;color:white;font-size:0.85rem;text-align:center}
 .status-bar.online{background:rgba(76,175,80,0.4)}
+.status-bar.config{background:rgba(255,193,7,0.4)}
 .user-bar{background:rgba(255,255,255,0.15);padding:12px;border-radius:25px;text-align:center;color:white;margin-bottom:15px;font-size:0.9rem}
 .user-bar a{color:#ffd700;cursor:pointer;text-decoration:underline;margin:0 10px}
 .btn{background:linear-gradient(135deg,#1b5e20,#2e7d32);color:white;border:none;padding:12px 20px;border-radius:8px;font-size:1rem;cursor:pointer;display:inline-block;margin:0 5px}
@@ -20,11 +21,9 @@ h1{color:white;text-align:center;margin-bottom:10px;font-size:1.8rem}
 .btn-small{padding:8px 15px;font-size:0.85rem}
 .btn-outline{background:white;border:2px solid #1b5e20;color:#1b5e20}
 .btn-danger{background:#f56565}
+.btn-blue{background:linear-gradient(135deg,#2196F3,#03A9F4)}
 .section{background:white;border-radius:12px;padding:20px;margin-bottom:15px}
 .section h2{margin-bottom:15px;color:#333;font-size:1.1rem}
-.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:15px}
-.stat-card{background:linear-gradient(135deg,#1b5e20,#2e7d32);color:white;padding:15px;border-radius:10px;text-align:center}
-.stat-value{font-size:1.5rem;font-weight:bold}
 .form-group{margin-bottom:12px}
 label{display:block;margin-bottom:5px;color:#555;font-size:0.9rem}
 input,select,textarea{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;font-size:1rem}
@@ -48,23 +47,35 @@ input,select,textarea{width:100%;padding:12px;border:2px solid #e0e0e0;border-ra
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:1000}
 .modal.active{display:flex}
-.modal-content{background:white;padding:25px;border-radius:12px;width:90%;max-width:400px;max-height:90vh;overflow-y:auto}
+.modal-content{background:white;padding:25px;border-radius:12px;width:90%;max-width:500px;max-height:90vh;overflow-y:auto}
 .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .close-btn{font-size:1.5rem;cursor:pointer;color:#999}
 .share-box{background:#f8f9fa;padding:15px;border-radius:8px;border:2px dashed #ccc;font-family:monospace;font-size:0.8rem;word-break:break-all;margin:10px 0}
 .empty{text-align:center;padding:30px;color:#999}
 .version-tag{position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.4);color:white;padding:4px 12px;border-radius:20px;font-size:0.75rem}
+.config-box{background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:15px;margin-bottom:15px}
+.config-box h3{color:#856404;margin-bottom:10px}
+.config-box p{color:#856404;font-size:0.9rem;margin-bottom:10px}
 </style>
 </head>
 <body>
 <div class="container">
 <h1>💵 存钱小工具</h1>
-<div class="status-bar" id="statusBar"><span id="statusText">🔄 正在连接...</span></div>
+<div class="status-bar" id="statusBar"><span id="statusText">🔄 检查配置...</span></div>
+
+<div class="config-box" id="configBox" style="display:none">
+<h3>⚠️ 需要配置 Firebase</h3>
+<p>要实现云端同步，需要配置 Firebase Realtime Database。</p>
+<button class="btn btn-blue" id="showConfigBtn">🔧 配置 Firebase</button>
+</div>
+
 <div class="user-bar">我是: <strong id="displayName">我</strong> <a id="renameLink">改名</a> <button class="btn" id="joinBtn" style="margin-left:10px">👋 加入家庭计划</button></div>
+
 <div class="stats-grid">
 <div class="stat-card"><div class="stat-value" id="statTotal">¥0</div><div class="stat-label">总存款</div></div>
 <div class="stat-card"><div class="stat-value" id="statCount">0</div><div class="stat-label">我的计划</div></div>
 </div>
+
 <div class="section">
 <h2>🎯 新建计划</h2>
 <form id="createForm">
@@ -75,17 +86,20 @@ input,select,textarea{width:100%;padding:12px;border:2px solid #e0e0e0;border-ra
 <button type="submit" class="btn">✨ 创建计划</button>
 </form>
 </div>
+
 <div class="section">
 <div class="plan-tabs"><div class="plan-tab active" data-tab="all">全部</div><div class="plan-tab" data-tab="private">🔒 私人</div><div class="plan-tab" data-tab="family">👨‍👩‍👧‍👦 家庭</div></div>
 <h2>📋 我的计划</h2>
 <div id="goalsList"><div class="empty">还没有计划，创建一个吧！</div></div>
 </div>
+
 <div class="section">
 <h2>📝 最近存入记录</h2>
 <div id="recordsList"><div class="empty">还没有记录</div></div>
 </div>
 </div>
-<div class="version-tag">v8.0 完美版</div>
+
+<div class="version-tag">v9.0 配置版</div>
 
 <div class="modal" id="depositModal">
 <div class="modal-content">
@@ -130,58 +144,118 @@ input,select,textarea{width:100%;padding:12px;border:2px solid #e0e0e0;border-ra
 </div>
 </div>
 
-<script>
-// ==================== 配置 ====================
-const firebaseConfig={
-  apiKey:"AIzaSyDemo-SavingsTracker",
-  authDomain:"savings-tracker-demo.firebaseapp.com",
-  databaseURL:"https://savings-tracker-demo-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:"savings-tracker-demo",
-  storageBucket:"savings-tracker-demo.appspot.com",
-  messagingSenderId:"123456789",
-  appId:"1:123456789:web:demo"
-};
+<div class="modal" id="configModal">
+<div class="modal-content">
+<div class="modal-header"><h3>🔧 Firebase 配置</h3><span class="close-btn" data-close="configModal">&times;</span></div>
+<div style="background:#e3f2fd;padding:15px;border-radius:8px;margin-bottom:15px">
+<strong>📖 配置说明：</strong><br>
+1. 访问 <a href="https://console.firebase.google.com" target="_blank">Firebase 控制台</a><br>
+2. 创建项目 → 添加 Web 应用<br>
+3. 复制配置信息填入下方
+</div>
+<form id="configForm">
+<div class="form-group"><label>API Key</label><input type="text" id="fbApiKey" placeholder="AIzaSy..." required></div>
+<div class="form-group"><label>Auth Domain</label><input type="text" id="fbAuthDomain" placeholder="your-app.firebaseapp.com" required></div>
+<div class="form-group"><label>Database URL</label><input type="text" id="fbDatabaseURL" placeholder="https://your-app-default-rtdb.firebaseio.com" required></div>
+<div class="form-group"><label>Project ID</label><input type="text" id="fbProjectId" placeholder="your-app" required></div>
+<button type="submit" class="btn" style="width:100%">💾 保存配置</button>
+</form>
+</div>
+</div>
 
-let db=null,syncListeners={},isOnline=false;
-try{
-  firebase.initializeApp(firebaseConfig);
-  db=firebase.database();
-  console.log("Firebase OK");
-}catch(e){
-  console.log("Firebase Error:",e.message);
+<script>
+// 存储键
+const STORAGE_KEY="savings_v9_data";
+const USER_KEY="savings_v9_user";
+const CONFIG_KEY="savings_v9_config";
+
+let currentTab="all",currentUser="我",db=null,isOnline=false;
+
+// 检查是否有配置
+function getConfig(){
+  try{
+    const c=localStorage.getItem(CONFIG_KEY);
+    return c?JSON.parse(c):null;
+  }catch(e){return null;}
 }
 
-const STORAGE_KEY="savings_v8_data",USER_KEY="savings_v8_user";
-let currentTab="all",currentUser="我";
+function saveConfig(config){
+  localStorage.setItem(CONFIG_KEY,JSON.stringify(config));
+}
+
+// 初始化 Firebase
+function initFirebase(){
+  const config=getConfig();
+  if(!config){
+    document.getElementById("configBox").style.display="block";
+    updateStatus("offline","⚠️ 未配置 Firebase - 数据仅保存在本地");
+    return false;
+  }
+  
+  try{
+    firebase.initializeApp(config);
+    db=firebase.database();
+    console.log("Firebase 初始化成功");
+    
+    // 监听连接状态
+    db.ref(".info/connected").on("value",(snap)=>{
+      isOnline=snap.val()===true;
+      if(isOnline){
+        updateStatus("online","🟢 已连接到云端，数据实时同步");
+        // 启动所有家庭计划的同步
+        const data=loadLocalData();
+        data.goals.filter(g=>g.type==="family").forEach(g=>startSync(g.id));
+      }else{
+        updateStatus("offline","🔴 离线模式 - 数据保存在本地");
+      }
+    });
+    
+    document.getElementById("configBox").style.display="none";
+    return true;
+  }catch(e){
+    console.log("Firebase 初始化失败:",e.message);
+    updateStatus("offline","❌ Firebase 配置错误 - "+e.message);
+    document.getElementById("configBox").style.display="block";
+    return false;
+  }
+}
 
 function updateStatus(status,message){
   const bar=document.getElementById("statusBar"),text=document.getElementById("statusText");
-  if(status==="online"){bar.classList.add("online");text.innerHTML="🟢 "+message;}
-  else{bar.classList.remove("online");text.innerHTML="🔴 "+message;}
+  bar.className="status-bar "+status;
+  text.innerHTML=message;
 }
 
 function getUser(){return localStorage.getItem(USER_KEY)||"我";}
 function setUser(name){currentUser=name||"我";localStorage.setItem(USER_KEY,currentUser);}
 
 function loadLocalData(){
-  try{const d=localStorage.getItem(STORAGE_KEY);return d?JSON.parse(d):{goals:[],records:[]};}
-  catch(e){return{goals:[],records:[]};}
+  try{
+    const d=localStorage.getItem(STORAGE_KEY);
+    return d?JSON.parse(d):{goals:[],records:[]};
+  }catch(e){return{goals:[],records:[]};}
 }
 
 function saveLocalData(data){
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data));return true;}
-  catch(e){alert("保存失败："+e.message);return false;}
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+    return true;
+  }catch(e){alert("保存失败："+e.message);return false;}
 }
 
+// 云端同步
 function uploadToCloud(goalId){
   if(!db||!isOnline)return Promise.resolve();
-  const data=loadLocalData(),goal=data.goals.find(g=>g.id===goalId),records=data.records.filter(r=>r.goalId===goalId);
+  const data=loadLocalData();
+  const goal=data.goals.find(g=>g.id===goalId);
+  const records=data.records.filter(r=>r.goalId===goalId);
   if(!goal)return Promise.resolve();
   return db.ref("plans/"+goalId).set({goal:goal,records:records,lastUpdate:Date.now()})
     .then(()=>console.log("上传到云端:",goalId))
     .catch(err=>console.log("上传失败:",err.message));
 }
 
+let syncListeners={};
 function startSync(goalId){
   if(!db||syncListeners[goalId])return;
   console.log("开始同步:",goalId);
@@ -200,7 +274,6 @@ function startSync(goalId){
       }
       saveLocalData(localData);
       render();
-      console.log("已同步:",goalId);
     }
   });
 }
@@ -212,39 +285,24 @@ function stopSync(goalId){
   }
 }
 
-if(db){
-  db.ref(".info/connected").on("value",(snap)=>{
-    isOnline=snap.val()===true;
-    if(isOnline){
-      updateStatus("online","已连接服务器，实时同步中");
-      loadLocalData().goals.filter(g=>g.type==="family").forEach(g=>startSync(g.id));
-    }else{updateStatus("offline","离线模式 - 数据保存在本地");}
-  });
-}
-
+// 工具函数
 function genId(){return Date.now().toString(36)+Math.random().toString(36).substr(2,6);}
 function fmtMoney(n){return"¥"+parseFloat(n).toLocaleString("zh-CN",{maximumFractionDigits:0});}
 function getSaved(goalId,records){return records.filter(r=>r.goalId===goalId).reduce((s,r)=>s+r.amount,0);}
-
 function canView(goal,user){
   if(goal.type==="private")return goal.owner===user;
   if(goal.owner===user)return true;
   if(goal.members&&goal.members.includes(user))return true;
   return false;
 }
-
 function isOwner(goal){return goal.owner===currentUser;}
 function canDeposit(goal){if(goal.type==="private")return goal.owner===currentUser;return canView(goal,currentUser);}
 function canInvite(goal){return goal.type==="family"&&isOwner(goal);}
-
-function escapeHtml(text){
-  if(!text)return"";
-  return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
-
+function escapeHtml(text){if(!text)return"";return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function encodeShareCode(obj){return btoa(encodeURIComponent(JSON.stringify(obj)));}
 function decodeShareCode(code){return JSON.parse(decodeURIComponent(atob(code)));}
 
+// 渲染
 function switchTab(tab){
   currentTab=tab;
   document.querySelectorAll(".plan-tab").forEach(t=>{t.classList.toggle("active",t.dataset.tab===tab);});
@@ -303,7 +361,6 @@ function render(){
   
   const vids=myGoals.map(g=>g.id);
   const recs=data.records.filter(r=>vids.includes(r.goalId)).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,20);
-  
   const rlist=document.getElementById("recordsList");
   if(recs.length===0){rlist.innerHTML='<div class="empty">还没有记录</div>';}
   else{
@@ -317,12 +374,18 @@ function render(){
 function showModal(id){document.getElementById(id).classList.add("active");}
 function closeModal(id){document.getElementById(id).classList.remove("active");}
 
+// 初始化
 document.addEventListener("DOMContentLoaded",()=>{
   console.log("应用启动...");
   currentUser=getUser();
   
+  // 初始化 Firebase
+  const hasConfig=initFirebase();
+  
+  // Tab切换
   document.querySelectorAll(".plan-tab").forEach(tab=>{tab.addEventListener("click",()=>switchTab(tab.dataset.tab));});
   
+  // 创建计划
   document.getElementById("createForm").addEventListener("submit",async(e)=>{
     e.preventDefault();
     const name=document.getElementById("gName").value.trim();
@@ -337,13 +400,23 @@ document.addEventListener("DOMContentLoaded",()=>{
     data.goals.push(g);
     if(!saveLocalData(data))return;
     
-    if(type==="family"&&isOnline){await uploadToCloud(g.id);startSync(g.id);}
+    if(type==="family"){
+      if(db&&isOnline){
+        await uploadToCloud(g.id);
+        startSync(g.id);
+        alert(`✅ 家庭计划「${name}」创建成功！\n\n已同步到云端，点击【邀请】按钮分享邀请码给家人。`);
+      }else{
+        alert(`✅ 家庭计划「${name}」创建成功！\n\n⚠️ 当前离线，数据保存在本地。配置 Firebase 后可实现云端同步。`);
+      }
+    }else{
+      alert(`✅ 私人计划「${name}」创建成功！`);
+    }
     
     e.target.reset();
     render();
-    alert(type==="family"?`✅ 家庭计划「${name}」创建成功！\n\n点击【邀请】按钮分享邀请码给家人。`:`✅ 私人计划「${name}」创建成功！`);
   });
   
+  // 存入
   document.getElementById("depositForm").addEventListener("submit",async(e)=>{
     e.preventDefault();
     const gid=document.getElementById("dGoalId").value;
@@ -357,20 +430,22 @@ document.addEventListener("DOMContentLoaded",()=>{
     data.records.push({id:genId(),goalId:gid,amount:amount,note:note,who:currentUser,date:new Date().toISOString()});
     saveLocalData(data);
     
-    if(goal&&goal.type==="family"&&isOnline)await uploadToCloud(gid);
+    if(goal&&goal.type==="family"&&db&&isOnline){
+      await uploadToCloud(gid);
+    }
     
     closeModal("depositModal");
     e.target.reset();
     render();
-    alert(goal&&goal.type==="family"?"✅ 存入成功！已同步到云端。":"✅ 存入成功！");
+    alert(goal&&goal.type==="family"&&db&&isOnline?"✅ 存入成功！已同步到云端。":"✅ 存入成功！");
   });
   
+  // 加入家庭计划
   document.getElementById("joinForm").addEventListener("submit",async(e)=>{
     e.preventDefault();
     try{
       const code=document.getElementById("joinCode").value.trim();
       if(!code){alert("请输入分享码");return;}
-      
       const share=decodeShareCode(code);
       if(share.type!=="savings_v4")throw new Error("无效的分享码格式");
       
@@ -380,15 +455,19 @@ document.addEventListener("DOMContentLoaded",()=>{
       data.goals.push({id:share.planId,name:share.name,target:share.target,months:share.months,monthly:share.monthly,type:"family",owner:share.owner,members:[currentUser],joinedAt:new Date().toISOString()});
       saveLocalData(data);
       
-      if(isOnline){await uploadToCloud(share.planId);startSync(share.planId);}
+      if(db&&isOnline){
+        await uploadToCloud(share.planId);
+        startSync(share.planId);
+      }
       
       closeModal("joinModal");
       e.target.reset();
       render();
-      alert("✅ 成功加入家庭计划！\n\n现在你可以查看计划、存入金额，数据会实时同步给所有成员。");
+      alert("✅ 成功加入家庭计划！");
     }catch(err){alert("❌ 加入失败："+err.message);}
   });
   
+  // 改名
   document.getElementById("userForm").addEventListener("submit",(e)=>{
     e.preventDefault();
     const name=document.getElementById("userNameInput").value.trim();
@@ -398,12 +477,14 @@ document.addEventListener("DOMContentLoaded",()=>{
     alert("✅ 名称已更新为："+(name||"我"));
   });
   
+  // 复制邀请码
   document.getElementById("copyInviteBtn").addEventListener("click",()=>{
     const code=document.getElementById("inviteCode").textContent;
     if(!code){alert("没有邀请码可复制");return;}
     navigator.clipboard.writeText(code).then(()=>alert("✅ 邀请码已复制！请发给家人。")).catch(()=>alert("复制失败，请手动复制"));
   });
   
+  // 计划卡片按钮
   document.getElementById("goalsList").addEventListener("click",(e)=>{
     const btn=e.target.closest("button");
     if(!btn)return;
@@ -435,10 +516,39 @@ document.addEventListener("DOMContentLoaded",()=>{
     }
   });
   
+  // 其他按钮
   document.getElementById("renameLink").addEventListener("click",()=>{document.getElementById("userNameInput").value=currentUser;showModal("userModal");});
   document.getElementById("joinBtn").addEventListener("click",()=>showModal("joinModal"));
+  document.getElementById("showConfigBtn").addEventListener("click",()=>{
+    const config=getConfig();
+    if(config){
+      document.getElementById("fbApiKey").value=config.apiKey||"";
+      document.getElementById("fbAuthDomain").value=config.authDomain||"";
+      document.getElementById("fbDatabaseURL").value=config.databaseURL||"";
+      document.getElementById("fbProjectId").value=config.projectId||"";
+    }
+    showModal("configModal");
+  });
+  
+  // 保存配置
+  document.getElementById("configForm").addEventListener("submit",(e)=>{
+    e.preventDefault();
+    const config={
+      apiKey:document.getElementById("fbApiKey").value.trim(),
+      authDomain:document.getElementById("fbAuthDomain").value.trim(),
+      databaseURL:document.getElementById("fbDatabaseURL").value.trim(),
+      projectId:document.getElementById("fbProjectId").value.trim()
+    };
+    saveConfig(config);
+    closeModal("configModal");
+    alert("✅ 配置已保存！刷新页面后生效。");
+    location.reload();
+  });
+  
+  // 关闭弹窗
   document.querySelectorAll("[data-close]").forEach(btn=>{btn.addEventListener("click",()=>closeModal(btn.dataset.close));});
-  document.querySelectorAll(".modal").forEach(modal=>{modal.addEventListener("click",(e)=>{if(e.target===modal)closeModal(modal.id);});});
+  document.querySelectorAll(".modal").forEach(modal=>{modal.addEventListener
+("click",(e)=>{if(e.target===modal)closeModal(modal.id);});});
   
   render();
   console.log("初始化完成");
