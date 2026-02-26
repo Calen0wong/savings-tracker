@@ -3,199 +3,688 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>💵 存钱小工具 - v4.4</title>
+<title>💵 存钱小工具</title>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:linear-gradient(135deg,#1b5e20,#2e7d32,#85bb65);min-height:100vh;padding:15px}
-.container{max-width:800px;margin:0 auto}
-h1{color:white;text-align:center;margin-bottom:10px}
-.sync-bar{background:rgba(255,255,255,0.15);padding:10px 15px;border-radius:25px;margin-bottom:15px;color:white;font-size:0.85rem;text-align:center}
-.sync-bar.active{background:rgba(76,175,80,0.3)}
-.user-bar{background:rgba(255,255,255,0.15);padding:12px;border-radius:25px;text-align:center;color:white;margin-bottom:15px;font-size:0.9rem;display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:10px}
-.user-bar a{color:#ffd700;cursor:pointer}
-.btn-join{background:linear-gradient(135deg,#ff6b35,#f7931e);color:white;padding:8px 16px;border-radius:20px;font-weight:bold;border:none;cursor:pointer;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-.section{background:white;border-radius:12px;padding:20px;margin-bottom:15px}
-.section h2{margin-bottom:15px;color:#333;font-size:1.1rem}
-.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:15px}
-.stat-card{background:linear-gradient(135deg,#1b5e20,#2e7d32);color:white;padding:15px;border-radius:10px;text-align:center}
-.stat-value{font-size:1.5rem;font-weight:bold}
-.form-group{margin-bottom:12px}
-label{display:block;margin-bottom:5px;color:#555;font-size:0.9rem}
-input,select,textarea{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;font-size:1rem}
-.btn{background:linear-gradient(135deg,#1b5e20,#2e7d32);color:white;border:none;padding:12px 20px;border-radius:8px;font-size:1rem;cursor:pointer}
-.btn-gold{background:linear-gradient(135deg,#ffd700,#ffb300);color:#1b5e20;font-weight:bold}
-.btn-small{padding:8px 15px;font-size:0.85rem}
-.btn-outline{background:white;border:2px solid #1b5e20;color:#1b5e20}
-.btn-danger{background:#f56565}
-.plan-tabs{display:flex;gap:10px;margin-bottom:15px;border-bottom:2px solid #e0e0e0;padding-bottom:10px}
-.plan-tab{padding:8px 16px;cursor:pointer;border-radius:20px;background:#f5f5f5;color:#666}
-.plan-tab.active{background:#1b5e20;color:white}
-.goal-card{border:2px solid #e0e0e0;border-radius:12px;padding:15px;margin-bottom:12px}
-.goal-card.private{border-left:4px solid #2196F3}
-.goal-card.family{border-left:4px solid #ff9800;background:#fffde7}
-.goal-header{display:flex;justify-content:space-between;margin-bottom:10px}
-.goal-name{font-weight:bold;font-size:1.1rem}
-.badge{padding:4px 10px;border-radius:12px;font-size:0.75rem}
-.badge-private{background:#e3f2fd;color:#1976d2}
-.badge-family{background:#ff9800;color:white}
-.members{display:flex;gap:5px;margin:10px 0;flex-wrap:wrap}
-.member-tag{background:#f5f5f5;padding:4px 12px;border-radius:15px;font-size:0.8rem}
-.member-tag.me{background:#1b5e20;color:white}
-.progress-bar{height:20px;background:#e8e8e8;border-radius:10px;overflow:hidden;margin:10px 0}
-.progress-fill{height:100%;background:linear-gradient(90deg,#1b5e20,#4caf50,#ffd700);border-radius:10px;transition:width 0.5s}
-.goal-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0;font-size:0.8rem;color:#666;text-align:center}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:1000}
-.modal.active{display:flex}
-.modal-content{background:white;padding:25px;border-radius:12px;width:90%;max-width:400px;max-height:90vh;overflow-y:auto}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.close-btn{font-size:1.5rem;cursor:pointer;color:#999}
-.share-box{background:#f8f9fa;padding:15px;border-radius:8px;border:2px dashed #ccc;font-family:monospace;font-size:0.8rem;word-break:break-all;margin:10px 0}
-.empty-state{text-align:center;padding:30px;color:#999}
-.version-tag{position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.4);color:white;padding:4px 12px;border-radius:20px;font-size:0.75rem}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { 
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, #1b5e20, #2e7d32, #85bb65);
+  min-height: 100vh;
+  padding: 15px;
+}
+.container { max-width: 800px; margin: 0 auto; }
+h1 { color: white; text-align: center; margin-bottom: 10px; font-size: 1.8rem; }
+.sync-bar { 
+  background: rgba(255,255,255,0.2); 
+  padding: 10px 15px; 
+  border-radius: 25px; 
+  margin-bottom: 15px; 
+  color: white; 
+  font-size: 0.85rem; 
+  text-align: center;
+}
+.user-bar {
+  background: rgba(255,255,255,0.15);
+  padding: 12px;
+  border-radius: 25px;
+  text-align: center;
+  color: white;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+}
+.user-bar a { color: #ffd700; cursor: pointer; text-decoration: underline; margin: 0 10px; }
+.btn-join {
+  background: linear-gradient(135deg, #ff6b35, #f7931e);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  margin-left: 10px;
+}
+.section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.section h2 { margin-bottom: 15px; color: #333; font-size: 1.1rem; }
+.stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
+.stat-card {
+  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+  color: white;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+}
+.stat-value { font-size: 1.5rem; font-weight: bold; }
+.form-group { margin-bottom: 12px; }
+label { display: block; margin-bottom: 5px; color: #555; font-size: 0.9rem; }
+input, select, textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+.btn {
+  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.btn-gold { background: linear-gradient(135deg, #ffd700, #ffb300); color: #1b5e20; font-weight: bold; }
+.btn-small { padding: 8px 15px; font-size: 0.85rem; }
+.btn-outline { background: white; border: 2px solid #1b5e20; color: #1b5e20; }
+.btn-danger { background: #f56565; }
+.plan-tabs { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+.plan-tab { padding: 8px 16px; cursor: pointer; border-radius: 20px; background: #f5f5f5; color: #666; }
+.plan-tab.active { background: #1b5e20; color: white; }
+.goal-card { border: 2px solid #e0e0e0; border-radius: 12px; padding: 15px; margin-bottom: 12px; }
+.goal-card.private { border-left: 4px solid #2196F3; }
+.goal-card.family { border-left: 4px solid #ff9800; background: #fffde7; }
+.goal-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.goal-name { font-weight: bold; font-size: 1.1rem; }
+.badge { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; }
+.badge-private { background: #e3f2fd; color: #1976d2; }
+.badge-family { background: #ff9800; color: white; }
+.members { display: flex; gap: 5px; margin: 10px 0; flex-wrap: wrap; }
+.member-tag { background: #f5f5f5; padding: 4px 12px; border-radius: 15px; font-size: 0.8rem; }
+.member-tag.me { background: #1b5e20; color: white; }
+.progress-bar { height: 20px; background: #e8e8e8; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #1b5e20, #4caf50, #ffd700); border-radius: 10px; transition: width 0.5s; }
+.goal-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0; font-size: 0.8rem; color: #666; text-align: center; }
+.goal-stat-item { background: #f9f9f9; padding: 8px; border-radius: 8px; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+.modal.active { display: flex; }
+.modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.close-btn { font-size: 1.5rem; cursor: pointer; color: #999; }
+.share-box { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 2px dashed #ccc; font-family: monospace; font-size: 0.8rem; word-break: break-all; margin: 10px 0; }
+.empty { text-align: center; padding: 30px; color: #999; }
+.version-tag { position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.4); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; }
 </style>
 </head>
 <body>
 <div class="container">
-<h1>💵 存钱小工具</h1>
-<div class="sync-bar" id="syncBar">📱 私人计划仅本机存储 | 👥 家庭计划实时共享</div>
-<div class="user-bar">
-<span>我是: <strong id="displayName">我</strong></span>
-<a onclick="showUserModal()">改名</a>
-<button class="btn-join" onclick="showJoinModal()">👋 加入家庭计划</button>
+  <h1>💵 存钱小工具</h1>
+  <div class="sync-bar" id="syncBar">📱 私人计划仅本机存储 | 👥 家庭计划实时共享</div>
+  <div class="user-bar">
+    我是: <strong id="displayName">我</strong>
+    <a id="renameLink">改名</a>
+    <button class="btn-join" id="joinBtn">👋 加入家庭计划</button>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-value" id="statTotal">¥0</div><div class="stat-label">总存款</div></div>
+    <div class="stat-card"><div class="stat-value" id="statCount">0</div><div class="stat-label">我的计划</div></div>
+  </div>
+  <div class="section">
+    <h2>🎯 新建计划</h2>
+    <form id="createForm">
+      <div class="form-group">
+        <label>计划名称</label>
+        <input type="text" id="gName" placeholder="例如：买新车" required>
+      </div>
+      <div class="form-group">
+        <label>目标金额 (¥)</label>
+        <input type="number" id="gTarget" placeholder="100000" min="1" required>
+      </div>
+      <div class="form-group">
+        <label>计划时长（月）</label>
+        <input type="number" id="gMonths" placeholder="24" min="1" required>
+      </div>
+      <div class="form-group">
+        <label>计划类型</label>
+        <select id="gType">
+          <option value="private">🔒 私人计划 - 仅自己可见</option>
+          <option value="family">👨‍👩‍👧‍👦 家庭计划 - 邀请成员共享</option>
+        </select>
+      </div>
+      <button type="submit" class="btn">✨ 创建计划</button>
+    </form>
+  </div>
+  <div class="section">
+    <div class="plan-tabs">
+      <div class="plan-tab active" data-tab="all">全部</div>
+      <div class="plan-tab" data-tab="private">🔒 私人</div>
+      <div class="plan-tab" data-tab="family">👨‍👩‍👧‍👦 家庭</div>
+    </div>
+    <h2 id="planTitle">📋 我的计划</h2>
+    <div id="goalsList"><div class="empty">还没有计划，创建一个吧！</div></div>
+  </div>
+  <div class="section">
+    <h2>📝 最近存入记录</h2>
+    <div id="recordsList"><div class="empty">还没有记录</div></div>
+  </div>
 </div>
-<div class="stats-grid">
-<div class="stat-card"><div class="stat-value" id="statTotal">¥0</div><div class="stat-label">总存款</div></div>
-<div class="stat-card"><div class="stat-value" id="statCount">0</div><div class="stat-label">我的计划</div></div>
-</div>
-
-<div class="section">
-<h2>🎯 新建计划</h2>
-<form id="createForm">
-<div class="form-group"><label>计划名称</label><input type="text" id="gName" placeholder="例如：买新车" required></div>
-<div class="form-group"><label>目标金额 (¥)</label><input type="number" id="gTarget" placeholder="100000" min="1" required></div>
-<div class="form-group"><label>计划时长（月）</label><input type="number" id="gMonths" placeholder="24" min="1" required></div>
-<div class="form-group"><label>计划类型</label><select id="gType"><option value="private">🔒 私人计划</option><option value="family">👨‍👩‍👧‍👦 家庭计划</option></select></div>
-<button type="submit" class="btn" id="createBtn">✨ 创建计划</button>
-</form>
-</div>
-
-<div class="section">
-<div class="plan-tabs">
-<div class="plan-tab active" data-tab="all">全部</div>
-<div class="plan-tab" data-tab="private">🔒 私人</div>
-<div class="plan-tab" data-tab="family">👨‍👩‍👧‍👦 家庭</div>
-</div>
-<h2 id="planTitle">📋 我的计划</h2>
-<div id="goalsList"><div class="empty-state">还没有计划，创建一个吧！</div></div>
-</div>
-
-<div class="section">
-<h2>📝 最近存入记录</h2>
-<div id="recordsList"><div class="empty-state">还没有记录</div></div>
-</div>
-</div>
-<div class="version-tag">v4.4</div>
+<div class="version-tag">v4.5</div>
 
 <div class="modal" id="depositModal">
-<div class="modal-content">
-<div class="modal-header"><h3>💰 存入金额</h3><span class="close-btn" onclick="closeModal('depositModal')">&times;</span></div>
-<form id="depositForm">
-<input type="hidden" id="dGoalId">
-<div class="form-group"><label>计划名称</label><input type="text" id="dGoalName" readonly style="background:#f5f5f5"></div>
-<div class="form-group"><label>存入金额 (¥)</label><input type="number" id="dAmount" placeholder="5000" min="1" required></div>
-<div class="form-group"><label>备注（可选）</label><input type="text" id="dNote" placeholder="例如：本月工资"></div>
-<button type="submit" class="btn btn-gold" style="width:100%">确认存入</button>
-</form>
-</div>
+  <div class="modal-content">
+    <div class="modal-header"><h3>💰 存入金额</h3><span class="close-btn" data-close="depositModal">&times;</span></div>
+    <form id="depositForm">
+      <input type="hidden" id="dGoalId">
+      <div class="form-group"><label>计划名称</label><input type="text" id="dGoalName" readonly style="background:#f5f5f5"></div>
+      <div class="form-group"><label>存入金额 (¥)</label><input type="number" id="dAmount" placeholder="5000" min="1" required></div>
+      <div class="form-group"><label>备注（可选）</label><input type="text" id="dNote" placeholder="例如：本月工资"></div>
+      <button type="submit" class="btn btn-gold" style="width:100%">确认存入</button>
+    </form>
+  </div>
 </div>
 
 <div class="modal" id="inviteModal">
-<div class="modal-content">
-<div class="modal-header"><h3>🔗 邀请家人</h3><span class="close-btn" onclick="closeModal('inviteModal')">&times;</span></div>
-<p style="color:#666;margin-bottom:10px">复制分享码给家人：</p>
-<div class="share-box" id="inviteCode"></div>
-<button class="btn" onclick="copyInvite()" style="width:100%">📋 复制</button>
-</div>
+  <div class="modal-content">
+    <div class="modal-header"><h3>🔗 邀请家人</h3><span class="close-btn" data-close="inviteModal">&times;</span></div>
+    <p style="color:#666;margin-bottom:10px">复制分享码给家人：</p>
+    <div class="share-box" id="inviteCode"></div>
+    <button class="btn" id="copyInviteBtn" style="width:100%">📋 复制</button>
+  </div>
 </div>
 
 <div class="modal" id="joinModal">
-<div class="modal-content">
-<div class="modal-header"><h3>👋 加入家庭计划</h3><span class="close-btn" onclick="closeModal('joinModal')">&times;</span></div>
-<p style="color:#666;margin-bottom:10px">加入后即可与家人实时共享：</p>
-<form id="joinForm">
-<div class="form-group"><label>粘贴分享码</label><textarea id="joinCode" rows="4" placeholder="请粘贴分享码..." required></textarea></div>
-<button type="submit" class="btn" style="width:100%">立即加入</button>
-</form>
-</div>
+  <div class="modal-content">
+    <div class="modal-header"><h3>👋 加入家庭计划</h3><span class="close-btn" data-close="joinModal">&times;</span></div>
+    <p style="color:#666;margin-bottom:10px">加入后即可与家人实时共享：</p>
+    <form id="joinForm">
+      <div class="form-group"><label>粘贴分享码</label><textarea id="joinCode" rows="4" placeholder="请粘贴分享码..." required></textarea></div>
+      <button type="submit" class="btn" style="width:100%">立即加入</button>
+    </form>
+  </div>
 </div>
 
 <div class="modal" id="userModal">
-<div class="modal-content">
-<div class="modal-header"><h3>设置名称</h3><span class="close-btn" onclick="closeModal('userModal')">&times;</span></div>
-<form id="userForm">
-<div class="form-group"><label>你的名字</label><input type="text" id="userNameInput" placeholder="例如：爸爸" required></div>
-<button type="submit" class="btn" style="width:100%">保存</button>
-</form>
-</div>
+  <div class="modal-content">
+    <div class="modal-header"><h3>设置名称</h3><span class="close-btn" data-close="userModal">&times;</span></div>
+    <form id="userForm">
+      <div class="form-group"><label>你的名字</label><input type="text" id="userNameInput" placeholder="例如：爸爸" required></div>
+      <button type="submit" class="btn" style="width:100%">保存</button>
+    </form>
+  </div>
 </div>
 
 <script>
-// 配置
-const firebaseConfig={apiKey:"AI",authDomain:"d.firebaseapp.com",databaseURL:"https://d.firebaseio.com",projectId:"d",storageBucket:"d.appspot.com",messagingSenderId:"1",appId:"1:1"};
-let db=null,syncListeners={};
-try{firebase.initializeApp(firebaseConfig);db=firebase.database()}catch(e){console.log(e)}
-const STORAGE_KEY="savings_v4_data",USER_KEY="savings_v4_user";
-let currentTab="all";
-function getUser(){return localStorage.getItem(USER_KEY)||"我"}
-function setUser(n){localStorage.setItem(USER_KEY,n)}
-function loadData(){try{const d=localStorage.getItem(STORAGE_KEY);return d?JSON.parse(d):{goals:[],records:[]}}catch(e){return{goals:[],records:[]}}}
-function saveData(d){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(d));return true}catch(e){alert("保存失败");return false}}
-function genId(){return Date.now().toString(36)+Math.random().toString(36).substr(2,6)}
-function fmtMoney(n){return"¥"+parseFloat(n).toLocaleString("zh-CN",{maximumFractionDigits:0})}
-function getSaved(gid,recs){return recs.filter(r=>r.goalId===gid).reduce((s,r)=>s+r.amount,0)}
+// ==================== 配置 ====================
+const firebaseConfig = {
+  apiKey: "demo",
+  authDomain: "demo.firebaseapp.com",
+  databaseURL: "https://demo.firebaseio.com",
+  projectId: "demo",
+  storageBucket: "demo.appspot.com",
+  messagingSenderId: "123",
+  appId: "1:123:web:demo"
+};
 
-// 同步
-function startSync(gid){if(!db||syncListeners[gid])return;const ref=db.ref("plans/"+gid);syncListeners[gid]=ref.on("value",(s)=>{const c=s.val();if(!c)return;const l=loadData();const i=l.goals.findIndex(g=>g.id===gid);if(i<0)return;l.goals[i].name=c.goal.name;l.goals[i].target=c.goal.target;l.goals[i].months=c.goal.months;l.goals[i].monthly=c.goal.monthly;l.goals[i].members=c.goal.members||[];if(c.records)c.records.forEach(r=>{if(!l.records.find(x=>x.id===r.id))l.records.push(r)});saveData(l);render();updateSyncBar()})}
-function stopSync(gid){if(syncListeners[gid]){db.ref("plans/"+gid).off("value",syncListeners[gid]);delete syncListeners[gid];updateSyncBar()}}
-function uploadPlan(gid){if(!db)return;const d=loadData(),g=d.goals.find(x=>x.id===gid),r=d.records.filter(x=>x.goalId===gid);if(g)db.ref("plans/"+gid).set({goal:{...g,lastUpdate:Date.now()},records:r})}
-function updateSyncBar(){const c=Object.keys(syncListeners).length;const b=document.getElementById("syncBar");if(c>0){b.classList.add("active");b.textContent="🔄 "+c+"个计划同步中"}else{b.classList.remove("active");b.textContent="📱 私人计划仅本机存储 | 👥 家庭计划实时共享"}}
-function initSync(){loadData().goals.filter(g=>g.type==="family").forEach(g=>startSync(g.id))}
+let db = null;
+let syncListeners = {};
 
-// 权限
-function canView(g,u){if(g.type==="private")return g.owner===u;if(g.owner===u)return true;if(g.members&&g.members.includes(u))return true;return false}
-function isOwner(g){return g.owner===getUser()}
-function canDeposit(g){const u=getUser();if(g.type==="private")return g.owner===u;return canView(g,u)}
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+  console.log("Firebase OK");
+} catch(e) {
+  console.log("Firebase Error:", e);
+}
 
-// 渲染
-function switchTab(t){currentTab=t;document.querySelectorAll(".plan-tab").forEach(x=>{if(x.dataset.tab===t)x.classList.add("active");else x.classList.remove("active")});const titles={all:"📋 全部计划",private:"🔒 私人计划",family:"👨‍👩‍👧‍👦 家庭计划"};document.getElementById("planTitle").textContent=titles[t];render()}
-function render(){const d=loadData(),u=getUser();document.getElementById("displayName").textContent=u;const my=d.goals.filter(g=>canView(g,u));const total=my.reduce((s,g)=>s+getSaved(g.id,d.records),0);document.getElementById("statTotal").textContent=fmtMoney(total);document.getElementById("statCount").textContent=my.length;let vis=my;if(currentTab==="private")vis=my.filter(g=>g.type==="private");if(currentTab==="family")vis=my.filter(g=>g.type==="family");const list=document.getElementById("goalsList");if(vis.length===0){list.innerHTML="<div class=empty-state>还没有计划，创建一个吧！</div>"}else{list.innerHTML=vis.map(g=>{const saved=getSaved(g.id,d.records);const pct=Math.min(100,(saved/g.target*100)).toFixed(1);const done=saved>=g.target;const fam=g.type==="family";const sync=!!syncListeners[g.id];const mems=fam?[g.owner||"我",...(g.members||[])]:[];let html="<div class=goal-card "+(fam?"family":"private")+">";html+="<div class=goal-header><span class=goal-name>"+g.name+"</span>";html+="<span class=badge "+(fam?"badge-family":"badge-private")+">"+(fam?(sync?"🔄 ":"")+"家庭":"私人")+"</span></div>";if(fam&&mems.length){html+="<div class=members>";mems.forEach(m=>{html+="<span class=member-tag "+(m===u?"me":"")+">"+(m===u?"我":m)+(m===g.owner?" 👑":"")+"</span>"});html+="</div>"}html+="<div class=goal-stats><div><strong>"+fmtMoney(g.target)+"</strong><br>目标</div><div><strong>"+fmtMoney(saved)+"</strong><br>已存</div><div><strong>"+fmtMoney(Math.max(0,g.target-saved))+"</strong><br>剩余</div><div><strong>"+fmtMoney(g.monthly)+"</strong><br>每月</div></div>";html+="<div class=progress-bar><div class=progress-fill style=width:"+pct+"%></div></div>";html+="<div style=text-align:center;font-size:0.9rem;color:#666;margin:5px 0>"+pct+"% "+(done?"✅ 已完成":"⏳ 进行中")+"</div>";html+="<div class=actions>";if(canDeposit(g)){html+='<button class="btn btn-gold btn-small" data-gid="'+g.id+'" data-gname="'+g.name+'" onclick="handleDepositClick(this)">存入</button>'}if(fam&&isOwner(g)){html+='<button class="btn btn-outline btn-small" data-gid="'+g.id+'" onclick="handleInviteClick(this)">邀请</button>'}if(isOwner(g)){html+='<button class="btn btn-danger btn-small" data-gid="'+g.id+'" onclick="handleDeleteClick(this)">删除</button>'}html+="</div></div>";return html}).join("")}const vids=my.map(g=>g.id);const recs=d.records.filter(r=>vids.includes(r.goalId)).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,15);const rlist=document.getElementById("recordsList");if(recs.length===0){rlist.innerHTML="<div class=empty-state>还没有记录</div>"}else{rlist.innerHTML=recs.map(r=>{const g=d.goals.find(x=>x.id===r.goalId);return"<div style=padding:10px;border-bottom:1px solid #f0f0f0><div style=display:flex;justify-content:space-between><span><strong style=color:#1b5e20>+"+fmtMoney(r.amount)+"</strong> "+(g?g.name:"")+"</span><span style=color:#999;font-size:0.8rem>"+r.date.slice(0,10)+"</span></div><div style=font-size:0.85rem;color:#666>"+(r.who||"我")+" 存入"+(r.note?" · "+r.note:"")+"</div></div>"}).join("")}}
+const STORAGE_KEY = "savings_v5_data";
+const USER_KEY = "savings_v5_user";
+let currentTab = "all";
+let currentInviteGoalId = null;
 
-// 事件处理
-function handleDepositClick(btn){const gid=btn.dataset.gid;const gname=btn.dataset.gname;document.getElementById("dGoalId").value=gid;document.getElementById("dGoalName").value=gname;showModal("depositModal")}
-function handleInviteClick(btn){const gid=btn.dataset.gid;const d=loadData();const g=d.goals.find(x=>x.id===gid);if(!g)return;const share={type:"savings_v4",version:4,planId:g.id,name:g.name,target:g.target,months:g.months,monthly:g.monthly,owner:g.owner};document.getElementById("inviteCode").textContent=btoa(JSON.stringify(share));showModal("inviteModal")}
-function handleDeleteClick(btn){const gid=btn.dataset.gid;if(!confirm("确定删除？"))return;stopSync(gid);const d=loadData();d.goals=d.goals.filter(g=>g.id!==gid);d.records=d.records.filter(r=>r.goalId!==gid);saveData(d);render()}
+// ==================== 工具函数 ====================
+function getUser() {
+  return localStorage.getItem(USER_KEY) || "我";
+}
 
-// 表单提交
-document.getElementById("createForm").addEventListener("submit",function(e){e.preventDefault();const name=document.getElementById("gName").value.trim();const target=parseFloat(document.getElementById("gTarget").value);const months=parseInt(document.getElementById("gMonths").value);const type=document.getElementById("gType").value;if(!name||!target||!months){alert("请填写完整");return}const d=loadData();const g={id:genId(),name:name,target:target,months:months,monthly:(target/months).toFixed(2),type:type,owner:getUser(),members:[],createdAt:new Date().toISOString()};d.goals.push(g);if(!saveData(d))return;this.reset();render();if(type==="family"&&db){uploadPlan(g.id);startSync(g.id);alert("✅ 家庭计划创建成功！点击"邀请"添加成员")}else{alert("✅ 私人计划创建成功！")}});
-document.getElementById("depositForm").addEventListener("submit",function(e){e.preventDefault();const gid=document.getElementById("dGoalId").value;const amt=parseFloat(document.getElementById("dAmount").value);const note=document.getElementById("dNote").value;if(!amt){alert("请输入金额");return}const d=loadData();const goal=d.goals.find(g=>g.id===gid);d.records.push({id:genId(),goalId:gid,amount:amt,note:note,who:getUser(),date:new Date().toISOString()});saveData(d);if(goal&&goal.type==="family")uploadPlan(gid);closeModal("depositModal");this.reset();render();if(goal&&goal.type==="family")alert("✅ 存入成功！已同步给家人")});
-document.getElementById("joinForm").addEventListener("submit",function(e){e.preventDefault();try{const code=document.getElementById("joinCode").value.trim();const share=JSON.parse(atob(code));if(share.type!=="savings_v4")throw new Error("无效分享码");const d=loadData();const u=getUser();if(d.goals.find(g=>g.id===share.planId)){alert("你已在该计划中");return}d.goals.push({id:share.planId,name:share.name,target:share.target,months:share.months,monthly:share.monthly,type:"family",owner:share.owner,members:[u],joinedAt:new Date().toISOString()});saveData(d);startSync(share.planId);closeModal("joinModal");this.reset();render();alert("✅ 加入成功！数据将实时同步")}catch(err){alert("❌ 加入失败："+err.message)}});
-document.getElementById("userForm").addEventListener("submit",function(e){e.preventDefault();setUser(document.getElementById("userNameInput").value.trim()||"我");closeModal("userModal");render()});
+function setUser(name) {
+  localStorage.setItem(USER_KEY, name);
+}
 
-// Tab切换
-document.querySelectorAll(".plan-tab").forEach(tab=>{tab.addEventListener("click",function(){switchTab(this.dataset.tab)})});
+function loadData() {
+  try {
+    const d = localStorage.getItem(STORAGE_KEY);
+    return d ? JSON.parse(d) : {goals: [], records: []};
+  } catch(e) {
+    console.error("Load error:", e);
+    return {goals: [], records: []};
+  }
+}
 
-// 其他函数
-function copyInvite(){navigator.clipboard.writeText(document.getElementById("inviteCode").textContent).then(()=>alert("已复制！"))}
-function showModal(id){document.getElementById(id).classList.add("active")}
-function closeModal(id){document.getElementById(id).classList.remove("active")}
-function showJoinModal(){showModal("joinModal")}
-function showUserModal(){document.getElementById("userNameInput").value=getUser();showModal("userModal")}
-window.onclick=function(e){if(e.target.classList.contains("modal"))e.target.classList.remove("active")}
-window.onload=function(){initSync();render()}
+function saveData(data) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    return true;
+  } catch(e) {
+    console.error("Save error:", e);
+    alert("保存失败：" + e.message);
+    return false;
+  }
+}
+
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+}
+
+function fmtMoney(n) {
+  return "¥" + parseFloat(n).toLocaleString("zh-CN", {maximumFractionDigits: 0});
+}
+
+function getSaved(goalId, records) {
+  return records.filter(r => r.goalId === goalId).reduce((s, r) => s + r.amount, 0);
+}
+
+// ==================== 同步功能 ====================
+function startSync(goalId) {
+  if (!db || syncListeners[goalId]) return;
+  
+  const ref = db.ref("plans/" + goalId);
+  syncListeners[goalId] = ref.on("value", (snapshot) => {
+    const cloud = snapshot.val();
+    if (!cloud) return;
+    
+    const local = loadData();
+    const idx = local.goals.findIndex(g => g.id === goalId);
+    if (idx < 0) return;
+    
+    local.goals[idx].name = cloud.goal.name;
+    local.goals[idx].target = cloud.goal.target;
+    local.goals[idx].months = cloud.goal.months;
+    local.goals[idx].monthly = cloud.goal.monthly;
+    local.goals[idx].members = cloud.goal.members || [];
+    
+    if (cloud.records) {
+      cloud.records.forEach(cr => {
+        if (!local.records.find(r => r.id === cr.id)) {
+          local.records.push(cr);
+        }
+      });
+    }
+    
+    saveData(local);
+    render();
+  });
+}
+
+function stopSync(goalId) {
+  if (syncListeners[goalId]) {
+    db.ref("plans/" + goalId).off("value", syncListeners[goalId]);
+    delete syncListeners[goalId];
+  }
+}
+
+function uploadPlan(goalId) {
+  if (!db) return;
+  const data = loadData();
+  const goal = data.goals.find(g => g.id === goalId);
+  const recs = data.records.filter(r => r.goalId === goalId);
+  if (goal) {
+    db.ref("plans/" + goalId).set({
+      goal: {...goal, lastUpdate: Date.now()},
+      records: recs
+    });
+  }
+}
+
+function initSync() {
+  loadData().goals.filter(g => g.type === "family").forEach(g => startSync(g.id));
+}
+
+// ==================== 权限检查 ====================
+function canView(goal, user) {
+  if (goal.type === "private") return goal.owner === user;
+  if (goal.owner === user) return true;
+  if (goal.members && goal.members.includes(user)) return true;
+  return false;
+}
+
+function isOwner(goal) {
+  return goal.owner === getUser();
+}
+
+function canDeposit(goal) {
+  const user = getUser();
+  if (goal.type === "private") return goal.owner === user;
+  return canView(goal, user);
+}
+
+// ==================== 渲染 ====================
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll(".plan-tab").forEach(t => {
+    if (t.dataset.tab === tab) t.classList.add("active");
+    else t.classList.remove("active");
+  });
+  const titles = {all: "📋 全部计划", private: "🔒 私人计划", family: "👨‍👩‍👧‍👦 家庭计划"};
+  document.getElementById("planTitle").textContent = titles[tab];
+  render();
+}
+
+function render() {
+  const data = loadData();
+  const user = getUser();
+  
+  document.getElementById("displayName").textContent = user;
+  
+  const myGoals = data.goals.filter(g => canView(g, user));
+  const total = myGoals.reduce((s, g) => s + getSaved(g.id, data.records), 0);
+  document.getElementById("statTotal").textContent = fmtMoney(total);
+  document.getElementById("statCount").textContent = myGoals.length;
+  
+  let visible = myGoals;
+  if (currentTab === "private") visible = myGoals.filter(g => g.type === "private");
+  if (currentTab === "family") visible = myGoals.filter(g => g.type === "family");
+  
+  const list = document.getElementById("goalsList");
+  if (visible.length === 0) {
+    list.innerHTML = '<div class="empty">还没有计划，创建一个吧！</div>';
+  } else {
+    let html = '';
+    visible.forEach(g => {
+      const saved = getSaved(g.id, data.records);
+      const pct = Math.min(100, (saved / g.target * 100)).toFixed(1);
+      const isDone = saved >= g.target;
+      const isFamily = g.type === "family";
+      const syncing = !!syncListeners[g.id];
+      const members = isFamily ? [g.owner || "我", ...(g.members || [])] : [];
+      
+      html += '<div class="goal-card ' + (isFamily ? 'family' : 'private') + '" data-goal-id="' + g.id + '">';
+      html += '<div class="goal-header">';
+      html += '<span class="goal-name">' + g.name + '</span>';
+      html += '<span class="badge ' + (isFamily ? 'badge-family' : 'badge-private') + '">';
+      html += isFamily ? (syncing ? '🔄 ' : '') + '家庭' : '私人';
+      html += '</span></div>';
+      
+      if (isFamily && members.length > 0) {
+        html += '<div class="members">';
+        members.forEach(m => {
+          html += '<span class="member-tag ' + (m === user ? 'me' : '') + '">';
+          html += (m === user ? '我' : m) + (m === g.owner ? ' 👑' : '');
+          html += '</span>';
+        });
+        html += '</div>';
+      }
+      
+      html += '<div class="goal-stats">';
+      html += '<div class="goal-stat-item"><div>' + fmtMoney(g.target) + '</div><div>目标</div></div>';
+      html += '<div class="goal-stat-item"><div>' + fmtMoney(saved) + '</div><div>已存</div></div>';
+      html += '<div class="goal-stat-item"><div>' + fmtMoney(Math.max(0, g.target - saved)) + '</div><div>剩余</div></div>';
+      html += '<div class="goal-stat-item"><div>' + fmtMoney(g.monthly) + '</div><div>每月</div></div>';
+      html += '</div>';
+      
+      html += '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>';
+      html += '<div style="text-align:center;font-size:0.9rem;color:#666;margin:5px 0">' + pct + '% ' + (isDone ? '✅ 已完成' : '⏳ 进行中') + '</div>';
+      
+      html += '<div class="actions">';
+      if (canDeposit(g)) {
+        html += '<button class="btn btn-gold btn-small action-deposit" data-goal-id="' + g.id + '" data-goal-name="' + g.name + '">存入</button>';
+      }
+      if (isFamily && isOwner(g)) {
+        html += '<button class="btn btn-outline btn-small action-invite" data-goal-id="' + g.id + '">邀请</button>';
+      }
+      if (isOwner(g)) {
+        html += '<button class="btn btn-danger btn-small action-delete" data-goal-id="' + g.id + '">删除</button>';
+      }
+      html += '</div></div>';
+    });
+    list.innerHTML = html;
+  }
+  
+  const vids = myGoals.map(g => g.id);
+  const recs = data.records.filter(r => vids.includes(r.goalId)).sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 15);
+  
+  const rlist = document.getElementById("recordsList");
+  if (recs.length === 0) {
+    rlist.innerHTML = '<div class="empty">还没有记录</div>';
+  } else {
+    let html = '';
+    recs.forEach(r => {
+      const g = data.goals.find(x => x.id === r.goalId);
+      html += '<div style="padding:10px;border-bottom:1px solid #f0f0f0">';
+      html += '<div style="display:flex;justify-content:space-between">';
+      html += '<span><strong style="color:#1b5e20">+' + fmtMoney(r.amount) + '</strong> ' + (g ? g.name : '') + '</span>';
+      html += '<span style="color:#999;font-size:0.8rem">' + r.date.slice(0, 10) + '</span>';
+      html += '</div>';
+      html += '<div style="font-size:0.85rem;color:#666">' + (r.who || '我') + ' 存入' + (r.note ? ' · ' + r.note : '') + '</div>';
+      html += '</div>';
+    });
+    rlist.innerHTML = html;
+  }
+}
+
+// ==================== 事件绑定 ====================
+document.addEventListener("DOMContentLoaded", function() {
+  console.log("DOM loaded");
+  
+  // Tab切换
+  document.querySelectorAll(".plan-tab").forEach(tab => {
+    tab.addEventListener("click", function() {
+      switchTab(this.dataset.tab);
+    });
+  });
+  
+  // 创建计划
+  document.getElementById("createForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById("gName").value.trim();
+    const target = parseFloat(document.getElementById("gTarget").value);
+    const months = parseInt(document.getElementById("gMonths").value);
+    const type = document.getElementById("gType").value;
+    
+    if (!name || !target || !months) {
+      alert("请填写完整信息");
+      return;
+    }
+    
+    const data = loadData();
+    const g = {
+      id: genId(),
+      name: name,
+      target: target,
+      months: months,
+      monthly: (target / months).toFixed(2),
+      type: type,
+      owner: getUser(),
+      members: [],
+      createdAt: new Date().toISOString()
+    };
+    
+    data.goals.push(g);
+    if (!saveData(data)) return;
+    
+    this.reset();
+    render();
+    
+    if (type === "family" && db) {
+      uploadPlan(g.id);
+      startSync(g.id);
+      alert("✅ 家庭计划创建成功！");
+    } else {
+      alert("✅ 私人计划创建成功！");
+    }
+  });
+  
+  // 存入
+  document.getElementById("depositForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    
+    const gid = document.getElementById("dGoalId").value;
+    const amount = parseFloat(document.getElementById("dAmount").value);
+    const note = document.getElementById("dNote").value;
+    
+    if (!amount) {
+      alert("请输入金额");
+      return;
+    }
+    
+    const data = loadData();
+    const goal = data.goals.find(g => g.id === gid);
+    
+    data.records.push({
+      id: genId(),
+      goalId: gid,
+      amount: amount,
+      note: note,
+      who: getUser(),
+      date: new Date().toISOString()
+    });
+    
+    saveData(data);
+    if (goal && goal.type === "family") uploadPlan(gid);
+    
+    closeModal("depositModal");
+    this.reset();
+    render();
+    
+    if (goal && goal.type === "family") {
+      alert("✅ 存入成功！已同步给家人");
+    }
+  });
+  
+  // 加入家庭计划
+  document.getElementById("joinForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    
+    try {
+      const code = document.getElementById("joinCode").value.trim();
+      const share = JSON.parse(atob(code));
+      
+      if (share.type !== "savings_v4") throw new Error("无效分享码");
+      
+      const data = loadData();
+      const user = getUser();
+      
+      if (data.goals.find(g => g.id === share.planId)) {
+        alert("你已经在该计划中了");
+        return;
+      }
+      
+      data.goals.push({
+        id: share.planId,
+        name: share.name,
+        target: share.target,
+        months: share.months,
+        monthly: share.monthly,
+        type: "family",
+        owner: share.owner,
+        members: [user],
+        joinedAt: new Date().toISOString()
+      });
+      
+      saveData(data);
+      startSync(share.planId);
+      
+      closeModal("joinModal");
+      this.reset();
+      render();
+      alert("✅ 加入成功！数据将实时同步");
+      
+    } catch(err) {
+      alert("❌ 加入失败：" + err.message);
+    }
+  });
+  
+  // 设置用户名
+  document.getElementById("userForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    setUser(document.getElementById("userNameInput").value.trim() || "我");
+    closeModal("userModal");
+    render();
+  });
+  
+  // 复制邀请码
+  document.getElementById("copyInviteBtn").addEventListener("click", function() {
+    navigator.clipboard.writeText(document.getElementById("inviteCode").textContent).then(() => {
+      alert("已复制！");
+    });
+  });
+  
+  // 按钮点击 - 事件委托
+  document.getElementById("goalsList").addEventListener("click", function(e) {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    
+    const gid = btn.dataset.goalId;
+    const gname = btn.dataset.goalName;
+    
+    if (btn.classList.contains("action-deposit")) {
+      document.getElementById("dGoalId").value = gid;
+      document.getElementById("dGoalName").value = gname;
+      showModal("depositModal");
+    } else if (btn.classList.contains("action-invite")) {
+      const data = loadData();
+      const g = data.goals.find(x => x.id === gid);
+      if (!g) return;
+      
+      currentInviteGoalId = gid;
+      const share = {
+        type: "savings_v4",
+        version: 4,
+        planId: g.id,
+        name: g.name,
+        target: g.target,
+        months: g.months,
+        monthly: g.monthly,
+        owner: g.owner
+      };
+      document.getElementById("inviteCode").textContent = btoa(JSON.stringify(share));
+      showModal("inviteModal");
+    } else if (btn.classList.contains("action-delete")) {
+      if (!confirm("确定删除此计划？")) return;
+      stopSync(gid);
+      const data = loadData();
+      data.goals = data.goals.filter(g => g.id !== gid);
+      data.records = data.records.filter(r => r.goalId !== gid);
+      saveData(data);
+      render();
+    }
+  });
+  
+  // 顶部按钮
+  document.getElementById("renameLink").addEventListener("click", function() {
+    document.getElementById("userNameInput").value = getUser();
+    showModal("userModal");
+  });
+  
+  document.getElementById("joinBtn").addEventListener("click", function() {
+    showModal("joinModal");
+  });
+  
+  // 关闭弹窗按钮
+  document.querySelectorAll("[data-close]").forEach(btn => {
+    btn.addEventListener("click", function() {
+      closeModal(this.dataset.close);
+    });
+  });
+  
+  // 点击弹窗外部关闭
+  document.querySelectorAll(".modal").forEach(modal => {
+    modal.addEventListener("click", function(e) {
+      if (e.target === this) closeModal(this.id);
+    });
+  });
+  
+  // 初始化
+  initSync();
+  render();
+  console.log("Init complete");
+});
+
+// ==================== 工具函数 ====================
+function showModal(id) {
+  document.getElementById(id).classList.add("active");
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove("active");
+}
 </script>
 </body>
 </html>
