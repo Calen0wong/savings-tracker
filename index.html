@@ -2,702 +2,553 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#1b5e20">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="description" content="简单好用的存钱追踪工具">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%23667eea'/%3E%3Ctext x='96' y='140' font-size='100' text-anchor='middle'%3E%F0%9F%92%B0%3C/text%3E%3C/svg%3E">
-    <title>💵 存钱小工具</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💵 存钱小工具 - 家庭版</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 50%, #85bb65 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 15px;
         }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        h1 {
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { color: white; text-align: center; margin-bottom: 10px; }
+        .user-bar {
+            background: rgba(255,255,255,0.15);
+            padding: 10px 15px;
+            border-radius: 25px;
+            text-align: center;
             color: white;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2rem;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #1b5e20;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-        }
-        
-        .stat-label {
-            color: #666;
+            margin-bottom: 20px;
             font-size: 0.9rem;
-            margin-top: 5px;
         }
-        
+        .user-bar a { color: #ffd700; text-decoration: underline; cursor: pointer; margin: 0 8px; }
         .section {
             background: white;
             border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        
-        .section h2 {
-            margin-bottom: 20px;
-            color: #333;
-            font-size: 1.3rem;
-        }
-        
-        .form-group {
+        .section h2 { margin-bottom: 15px; color: #333; font-size: 1.1rem; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
             margin-bottom: 15px;
         }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: 500;
+        .stat-card {
+            background: linear-gradient(135deg, #1b5e20, #2e7d32);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
         }
-        
-        input, select {
+        .stat-value { font-size: 1.5rem; font-weight: bold; }
+        .stat-label { font-size: 0.8rem; opacity: 0.9; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 5px; color: #555; font-size: 0.9rem; }
+        input, select, textarea {
             width: 100%;
             padding: 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 1rem;
-            transition: border-color 0.3s;
         }
-        
-        input:focus, select:focus {
-            outline: none;
-            border-color: #1b5e20;
-            box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1);
-        }
-        
+        input:focus, select:focus { outline: none; border-color: #1b5e20; }
         .btn {
-            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            background: linear-gradient(135deg, #1b5e20, #2e7d32);
             color: white;
             border: none;
-            padding: 12px 30px;
+            padding: 12px 20px;
             border-radius: 8px;
             font-size: 1rem;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: inline-block;
         }
-        
-        .btn:hover {
-            background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-        
-        .btn-success {
-            background: linear-gradient(135deg, #ffd700 0%, #ffb300 100%);
+        .btn-gold {
+            background: linear-gradient(135deg, #ffd700, #ffb300);
             color: #1b5e20;
             font-weight: bold;
         }
-        
-        .btn-success:hover {
-            background: linear-gradient(135deg, #ffeb3b 0%, #ffc107 100%);
-            color: #1b5e20;
-        }
-        
-        .btn-danger {
-            background: #f56565;
-            padding: 6px 12px;
-            font-size: 0.85rem;
-        }
-        
-        .btn-danger:hover {
-            background: #e53e3e;
-        }
-        
-        .goals-list {
-            display: grid;
-            gap: 15px;
-        }
-        
+        .btn-small { padding: 8px 15px; font-size: 0.85rem; }
+        .btn-outline { background: white; border: 2px solid #1b5e20; color: #1b5e20; }
+        .btn-danger { background: #f56565; }
         .goal-card {
             border: 2px solid #e0e0e0;
             border-radius: 12px;
-            padding: 20px;
-            transition: border-color 0.3s;
+            padding: 15px;
+            margin-bottom: 12px;
         }
-        
-        .goal-card:hover {
-            border-color: #1b5e20;
-            box-shadow: 0 4px 12px rgba(27, 94, 32, 0.15);
+        .goal-card.shared { border-color: #ffd700; background: linear-gradient(135deg, #fffde7, #fff); }
+        .goal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .goal-name { font-weight: bold; font-size: 1.1rem; }
+        .badge {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
         }
-        
-        .goal-card.completed {
-            border-color: #ffd700;
-            background: linear-gradient(135deg, #fffde7 0%, #fff9c4 100%);
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
-        }
-        
-        .goal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .goal-name {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .goal-status {
-            padding: 4px 12px;
-            border-radius: 20px;
+        .badge-private { background: #e3f2fd; color: #1976d2; }
+        .badge-shared { background: #ffd700; color: #1b5e20; font-weight: bold; }
+        .members { display: flex; gap: 5px; margin: 8px 0; flex-wrap: wrap; }
+        .member-tag {
+            background: #f0f0f0;
+            padding: 3px 10px;
+            border-radius: 15px;
             font-size: 0.8rem;
-            font-weight: 500;
         }
-        
-        .status-active {
-            background: #ebf8ff;
-            color: #3182ce;
-        }
-        
-        .status-completed {
-            background: #c6f6d5;
-            color: #22543d;
-        }
-        
-        .goal-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 10px;
-            margin-bottom: 15px;
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
+        .member-tag.me { background: #1b5e20; color: white; }
         .progress-bar {
             height: 20px;
             background: #e0e0e0;
             border-radius: 10px;
             overflow: hidden;
-            margin-bottom: 10px;
+            margin: 10px 0;
         }
-        
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #1b5e20, #4caf50, #ffd700);
             border-radius: 10px;
-            transition: width 0.5s ease;
-            box-shadow: inset 0 2px 4px rgba(255,255,255,0.3);
+            transition: width 0.3s;
         }
-        
-        .progress-fill.completed {
-            background: linear-gradient(90deg, #ffd700, #ffeb3b);
-        }
-        
-        .progress-text {
-            text-align: center;
-            font-weight: 500;
-            color: #555;
+        .goal-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+            font-size: 0.85rem;
+            color: #666;
             margin-bottom: 10px;
         }
-        
-        .goal-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .records-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .record-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .record-item:last-child {
-            border-bottom: none;
-        }
-        
-        .record-amount {
-            font-weight: bold;
-            color: #48bb78;
-        }
-        
-        .record-date {
-            color: #999;
-            font-size: 0.85rem;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-        
+        .actions { display: flex; gap: 8px; flex-wrap: wrap; }
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0,0,0,0.5);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
-        
-        .modal.active {
-            display: flex;
-        }
-        
+        .modal.active { display: flex; }
         .modal-content {
             background: white;
-            padding: 30px;
+            padding: 25px;
             border-radius: 12px;
             width: 90%;
             max-width: 400px;
             max-height: 90vh;
             overflow-y: auto;
         }
-        
         .modal-header {
-            margin-bottom: 20px;
-        }
-        
-        .close-btn {
-            float: right;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #999;
-        }
-        
-        .close-btn:hover {
-            color: #333;
-        }
-        
-        .delete-btn {
-            background: none;
-            border: none;
-            color: #999;
-            cursor: pointer;
-            font-size: 1.2rem;
-            padding: 0 5px;
-        }
-        
-        .delete-btn:hover {
-            color: #f56565;
-        }
-        
-        .goal-records {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #e0e0e0;
-            font-size: 0.85rem;
-        }
-        
-        .goal-record-item {
             display: flex;
             justify-content: space-between;
-            padding: 5px 0;
-            color: #666;
+            align-items: center;
+            margin-bottom: 20px;
         }
-        
-        .hidden { display: none !important; }
+        .close-btn { font-size: 1.5rem; cursor: pointer; color: #999; }
+        .share-box {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px dashed #ccc;
+            font-family: monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        .empty { text-align: center; padding: 30px; color: #999; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>💵 存钱小工具</h1>
+        <div class="user-bar">
+            我是: <strong id="displayName">我</strong> | 
+            <a onclick="showUserModal()">改名</a> | 
+            <a onclick="showJoinModal()">加入计划</a>
+        </div>
         
-        <!-- 统计卡片 -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-value" id="statTotal">¥0</div>
                 <div class="stat-label">总存款</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="statGoals">0</div>
-                <div class="stat-label">目标数</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="statCompleted">0</div>
-                <div class="stat-label">已完成</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="statMonth">¥0</div>
-                <div class="stat-label">本月存入</div>
+                <div class="stat-value" id="statCount">0</div>
+                <div class="stat-label">进行中的计划</div>
             </div>
         </div>
         
-        <!-- 新建目标 -->
         <div class="section">
-            <h2>🎯 新建存钱目标</h2>
+            <h2>🎯 新建目标</h2>
             <form id="createForm">
                 <div class="form-group">
                     <label>目标名称</label>
-                    <input type="text" id="goalName" placeholder="例如：旅行基金" required>
+                    <input type="text" id="gName" placeholder="例如：买车" required>
                 </div>
                 <div class="form-group">
                     <label>目标金额 (¥)</label>
-                    <input type="number" id="goalTarget" placeholder="10000" min="1" required>
+                    <input type="number" id="gTarget" placeholder="50000" min="1" required>
                 </div>
                 <div class="form-group">
                     <label>计划月数</label>
-                    <input type="number" id="goalMonths" placeholder="12" min="1" required>
+                    <input type="number" id="gMonths" placeholder="12" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>类型</label>
+                    <select id="gType">
+                        <option value="private">🔒 私人计划</option>
+                        <option value="shared">👥 共享计划（可邀请家人）</option>
+                    </select>
                 </div>
                 <button type="submit" class="btn">创建目标</button>
             </form>
         </div>
         
-        <!-- 存钱目标列表 -->
         <div class="section">
-            <h2>📋 我的目标</h2>
-            <div id="goalsList" class="goals-list">
-                <div class="empty-state">
-                    <p>还没有存钱目标，创建一个吧！</p>
-                </div>
-            </div>
+            <h2>📋 我的计划</h2>
+            <div id="goalsList"><div class="empty">还没有计划，创建一个吧！</div></div>
         </div>
         
-        <!-- 近期记录 -->
         <div class="section">
-            <h2>📝 近期存入记录</h2>
-            <div id="recordsList" class="records-list">
-                <div class="empty-state">
-                    <p>还没有存入记录</p>
-                </div>
-            </div>
+            <h2>📝 最近存入</h2>
+            <div id="recordsList"><div class="empty">还没有记录</div></div>
         </div>
     </div>
     
     <!-- 存入弹窗 -->
     <div class="modal" id="depositModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <span class="close-btn" onclick="closeDepositModal()">&times;</span>
-                <h3>存入金额</h3>
-            </div>
+            <div class="modal-header"><h3>存入金额</h3><span class="close-btn" onclick="closeModal('depositModal')">&times;</span></div>
             <form id="depositForm">
-                <input type="hidden" id="depositGoalId">
+                <input type="hidden" id="dGoalId">
                 <div class="form-group">
                     <label>目标</label>
-                    <input type="text" id="depositGoalName" readonly style="background: #f5f5f5">
+                    <input type="text" id="dGoalName" readonly style="background:#f5f5f5">
                 </div>
                 <div class="form-group">
-                    <label>存入金额 (¥)</label>
-                    <input type="number" id="depositAmount" placeholder="1000" min="1" required>
+                    <label>金额 (¥)</label>
+                    <input type="number" id="dAmount" placeholder="1000" min="1" required>
                 </div>
                 <div class="form-group">
-                    <label>备注 (可选)</label>
-                    <input type="text" id="depositNote" placeholder="例如：工资结余">
+                    <label>备注</label>
+                    <input type="text" id="dNote" placeholder="例如：工资">
                 </div>
-                <button type="submit" class="btn btn-success">确认存入</button>
+                <button type="submit" class="btn btn-gold">确认存入</button>
             </form>
         </div>
     </div>
     
+    <!-- 分享弹窗 -->
+    <div class="modal" id="shareModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>🔗 邀请家人</h3><span class="close-btn" onclick="closeModal('shareModal')">&times;</span></div>
+            <p>复制下方分享码给家人：</p>
+            <div class="share-box" id="shareCode"></div>
+            <button class="btn" onclick="copyCode()">📋 复制</button>
+            <p style="margin-top:15px;font-size:0.85rem;color:#666;">家人点击"加入计划"粘贴即可</p>
+        </div>
+    </div>
+    
+    <!-- 加入弹窗 -->
+    <div class="modal" id="joinModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>👋 加入共享计划</h3><span class="close-btn" onclick="closeModal('joinModal')">&times;</span></div>
+            <form id="joinForm">
+                <div class="form-group">
+                    <label>粘贴分享码</label>
+                    <textarea id="jCode" rows="4" placeholder="请粘贴家人给你的分享码..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-gold">加入计划</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 用户弹窗 -->
+    <div class="modal" id="userModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>👤 设置名字</h3><span class="close-btn" onclick="closeModal('userModal')">&times;</span></div>
+            <form id="userForm">
+                <div class="form-group">
+                    <label>你的名字（会显示在记录中）</label>
+                    <input type="text" id="uName" placeholder="例如：爸爸" required>
+                </div>
+                <button type="submit" class="btn">保存</button>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // 数据管理
-        const STORAGE_KEY = 'savings_tracker_data';
+        const STORAGE_KEY = 'savings_family_v1';
+        const USER_KEY = 'savings_username';
+        
+        function getUser() { return localStorage.getItem(USER_KEY) || '我'; }
+        function setUser(name) { localStorage.setItem(USER_KEY, name); }
         
         function loadData() {
-            const data = localStorage.getItem(STORAGE_KEY);
-            return data ? JSON.parse(data) : { goals: [], records: [] };
+            const d = localStorage.getItem(STORAGE_KEY);
+            return d ? JSON.parse(d) : { goals: [], records: [] };
+        }
+        function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+        function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2,5); }
+        
+        function fmtMoney(n) { return '¥' + parseFloat(n).toLocaleString('zh-CN',{maximumFractionDigits:0}); }
+        
+        function getSaved(goalId, records) {
+            return records.filter(r => r.goalId === goalId).reduce((s,r) => s + r.amount, 0);
         }
         
-        function saveData(data) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        }
-        
-        function generateId() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2);
-        }
-        
-        // 格式化货币
-        function formatMoney(amount) {
-            return '¥' + parseFloat(amount).toLocaleString('zh-CN', { 
-                minimumFractionDigits: 0, 
-                maximumFractionDigits: 0 
-            });
-        }
-        
-        // 获取目标已存金额
-        function getSavedAmount(goalId, records) {
-            return records.filter(r => r.goalId === goalId).reduce((sum, r) => sum + r.amount, 0);
-        }
-        
-        // 更新统计
         function updateStats() {
             const data = loadData();
-            const records = data.records;
-            const goals = data.goals;
-            
-            const totalSaved = records.reduce((sum, r) => sum + r.amount, 0);
-            const completedGoals = goals.filter(g => {
-                const saved = getSavedAmount(g.id, records);
-                return saved >= g.target;
-            }).length;
-            
-            const thisMonth = new Date().toISOString().slice(0, 7);
-            const monthSaved = records
-                .filter(r => r.date.startsWith(thisMonth))
-                .reduce((sum, r) => sum + r.amount, 0);
-            
-            document.getElementById('statTotal').textContent = formatMoney(totalSaved);
-            document.getElementById('statGoals').textContent = goals.length;
-            document.getElementById('statCompleted').textContent = completedGoals;
-            document.getElementById('statMonth').textContent = formatMoney(monthSaved);
+            const user = getUser();
+            const visible = data.goals.filter(g => canSee(g, user));
+            const total = visible.reduce((s,g) => s + getSaved(g.id, data.records), 0);
+            document.getElementById('statTotal').textContent = fmtMoney(total);
+            document.getElementById('statCount').textContent = visible.length;
         }
         
-        // 渲染目标列表
-        function renderGoals() {
+        function canSee(goal, user) {
+            if (goal.type !== 'shared') return true;
+            if (goal.owner === user) return true;
+            if (goal.members && goal.members.includes(user)) return true;
+            return false;
+        }
+        
+        function isOwner(goal) { return goal.owner === getUser() || !goal.owner; }
+        
+        function render() {
             const data = loadData();
-            const container = document.getElementById('goalsList');
+            const user = getUser();
+            document.getElementById('displayName').textContent = user;
             
-            if (data.goals.length === 0) {
-                container.innerHTML = '<div class="empty-state"><p>还没有存钱目标，创建一个吧！</p></div>';
-                return;
-            }
+            // 渲染目标
+            const visible = data.goals.filter(g => canSee(g, user));
+            const list = document.getElementById('goalsList');
             
-            container.innerHTML = data.goals.map(goal => {
-                const saved = getSavedAmount(goal.id, data.records);
-                const progress = Math.min(100, (saved / goal.target * 100)).toFixed(1);
-                const remaining = Math.max(0, goal.target - saved);
-                const isCompleted = saved >= goal.target;
-                
-                // 获取该目标的记录
-                const goalRecords = data.records
-                    .filter(r => r.goalId === goal.id)
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .slice(0, 3);
-                
-                const recordsHtml = goalRecords.length > 0 ? `
-                    <div class="goal-records">
-                        <div style="color: #999; margin-bottom: 5px;">最近存入:</div>
-                        ${goalRecords.map(r => `
-                            <div class="goal-record-item">
-                                <span>+${formatMoney(r.amount)} ${r.note ? '- ' + r.note : ''}</span>
-                                <span style="color: #999;">${r.date.slice(0, 10)}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                ` : '';
-                
-                return `
-                    <div class="goal-card ${isCompleted ? 'completed' : ''}">
+            if (visible.length === 0) {
+                list.innerHTML = '<div class="empty">还没有计划，创建一个吧！</div>';
+            } else {
+                list.innerHTML = visible.map(g => {
+                    const saved = getSaved(g.id, data.records);
+                    const pct = Math.min(100, (saved / g.target * 100)).toFixed(1);
+                    const isDone = saved >= g.target;
+                    const shared = g.type === 'shared';
+                    const members = shared ? [g.owner || '我', ...(g.members || [])] : [];
+                    
+                    return `<div class="goal-card ${shared ? 'shared' : ''}">
                         <div class="goal-header">
-                            <span class="goal-name">${goal.name}</span>
-                            <span class="goal-status ${isCompleted ? 'status-completed' : 'status-active'}">
-                                ${isCompleted ? '✅ 已完成' : '⏳ 进行中'}
-                            </span>
+                            <span class="goal-name">${g.name}</span>
+                            <span class="badge ${shared ? 'badge-shared' : 'badge-private'}">${shared ? '👥 共享' : '🔒 私人'}</span>
                         </div>
-                        <div class="goal-details">
-                            <div>目标: ${formatMoney(goal.target)}</div>
-                            <div>已存: ${formatMoney(saved)}</div>
-                            <div>剩余: ${formatMoney(remaining)}</div>
-                            <div>每月: ${formatMoney(goal.monthly)}</div>
+                        ${shared ? `<div class="members">${members.map(m => 
+                            `<span class="member-tag ${m === user ? 'me' : ''}">${m === user ? '我' : m}</span>`
+                        ).join('')}</div>` : ''}
+                        <div class="goal-info">
+                            <div>目标: ${fmtMoney(g.target)}</div>
+                            <div>已存: ${fmtMoney(saved)}</div>
+                            <div>剩余: ${fmtMoney(Math.max(0, g.target - saved))}</div>
+                            <div>每月: ${fmtMoney(g.monthly)}</div>
                         </div>
-                        <div class="progress-text">${progress}%</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill ${isCompleted ? 'completed' : ''}" style="width: ${progress}%"></div>
+                        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+                        <div style="text-align:center;font-size:0.9rem;color:#666;margin-bottom:10px;">${pct}% ${isDone ? '✅ 已完成' : ''}</div>
+                        <div class="actions">
+                            <button class="btn btn-gold btn-small" onclick="openDeposit('${g.id}', '${g.name}')">存入</button>
+                            ${shared && isOwner(g) ? `<button class="btn btn-outline btn-small" onclick="openShare('${g.id}')">邀请</button>` : ''}
+                            ${isOwner(g) ? `<button class="btn btn-danger btn-small" onclick="delGoal('${g.id}')">删除</button>` : ''}
                         </div>
-                        <div class="goal-actions">
-                            <button class="btn btn-success" onclick="openDepositModal('${goal.id}', '${goal.name}')">存入</button>
-                            <button class="btn btn-danger" onclick="deleteGoal('${goal.id}')">删除</button>
-                        </div>
-                        ${recordsHtml}
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        // 渲染记录列表
-        function renderRecords() {
-            const data = loadData();
-            const container = document.getElementById('recordsList');
-            
-            if (data.records.length === 0) {
-                container.innerHTML = '<div class="empty-state"><p>还没有存入记录</p></div>';
-                return;
+                    </div>`;
+                }).join('');
             }
             
-            const sortedRecords = [...data.records]
-                .sort((a, b) => new Date(b.date) - new Date(a.date))
+            // 渲染记录
+            const visibleIds = visible.map(g => g.id);
+            const recs = data.records
+                .filter(r => visibleIds.includes(r.goalId))
+                .sort((a,b) => new Date(b.date) - new Date(a.date))
                 .slice(0, 10);
             
-            container.innerHTML = sortedRecords.map(record => {
-                const goal = data.goals.find(g => g.id === record.goalId);
-                const goalName = goal ? goal.name : '未知目标';
-                return `
-                    <div class="record-item">
-                        <div>
-                            <span class="record-amount">+${formatMoney(record.amount)}</span>
-                            <span> - ${goalName}</span>
-                            ${record.note ? `<span style="color: #999;"> (${record.note})</span>` : ''}
+            const rlist = document.getElementById('recordsList');
+            if (recs.length === 0) {
+                rlist.innerHTML = '<div class="empty">还没有记录</div>';
+            } else {
+                rlist.innerHTML = recs.map(r => {
+                    const g = data.goals.find(x => x.id === r.goalId);
+                    return `<div style="padding:10px;border-bottom:1px solid #f0f0f0;">
+                        <div style="display:flex;justify-content:space-between;">
+                            <span><strong style="color:#1b5e20;">+${fmtMoney(r.amount)}</strong> ${g ? g.name : '未知'}</span>
+                            <span style="color:#999;font-size:0.8rem;">${r.date.slice(0,10)}</span>
                         </div>
-                        <div class="record-date">${record.date.slice(0, 10)} ${record.date.slice(11, 16)}</div>
-                    </div>
-                `;
-            }).join('');
+                        <div style="font-size:0.85rem;color:#666;">${r.who || '我'} ${r.note ? '- ' + r.note : ''}</div>
+                    </div>`;
+                }).join('');
+            }
+            
+            updateStats();
         }
         
         // 创建目标
-        document.getElementById('createForm').addEventListener('submit', function(e) {
+        document.getElementById('createForm').onsubmit = function(e) {
             e.preventDefault();
-            
-            const name = document.getElementById('goalName').value;
-            const target = parseFloat(document.getElementById('goalTarget').value);
-            const months = parseInt(document.getElementById('goalMonths').value);
-            
             const data = loadData();
-            data.goals.push({
-                id: generateId(),
-                name: name,
-                target: target,
-                months: months,
-                monthly: (target / months).toFixed(2),
+            const g = {
+                id: genId(),
+                name: document.getElementById('gName').value,
+                target: parseFloat(document.getElementById('gTarget').value),
+                months: parseInt(document.getElementById('gMonths').value),
+                monthly: (parseFloat(document.getElementById('gTarget').value) / parseInt(document.getElementById('gMonths').value)).toFixed(2),
+                type: document.getElementById('gType').value,
+                owner: getUser(),
+                members: [],
                 created: new Date().toISOString()
-            });
-            
+            };
+            data.goals.push(g);
             saveData(data);
             this.reset();
-            refreshAll();
-        });
+            render();
+        };
         
         // 存入
-        document.getElementById('depositForm').addEventListener('submit', function(e) {
+        function openDeposit(gid, gname) {
+            document.getElementById('dGoalId').value = gid;
+            document.getElementById('dGoalName').value = gname;
+            showModal('depositModal');
+        }
+        
+        document.getElementById('depositForm').onsubmit = function(e) {
             e.preventDefault();
-            
-            const goalId = document.getElementById('depositGoalId').value;
-            const amount = parseFloat(document.getElementById('depositAmount').value);
-            const note = document.getElementById('depositNote').value;
-            
             const data = loadData();
             data.records.push({
-                id: generateId(),
-                goalId: goalId,
-                amount: amount,
-                note: note,
+                id: genId(),
+                goalId: document.getElementById('dGoalId').value,
+                amount: parseFloat(document.getElementById('dAmount').value),
+                note: document.getElementById('dNote').value,
+                who: getUser(),
                 date: new Date().toISOString()
             });
-            
             saveData(data);
-            closeDepositModal();
+            closeModal('depositModal');
             this.reset();
-            refreshAll();
-            
-            // 检查是否完成目标
-            const goal = data.goals.find(g => g.id === goalId);
-            const saved = getSavedAmount(goalId, data.records);
-            if (saved >= goal.target && saved - amount < goal.target) {
-                setTimeout(() => alert(`🎉 恭喜！目标 "${goal.name}" 已达成！`), 100);
-            }
-        });
+            render();
+        };
         
-        // 删除目标
-        function deleteGoal(goalId) {
-            if (!confirm('确定要删除这个目标吗？相关的存入记录也会被删除。')) return;
-            
+        // 分享
+        let shareGid = '';
+        function openShare(gid) {
+            shareGid = gid;
             const data = loadData();
-            data.goals = data.goals.filter(g => g.id !== goalId);
-            data.records = data.records.filter(r => r.goalId !== goalId);
-            saveData(data);
-            refreshAll();
+            const g = data.goals.find(x => x.id === gid);
+            if (!g) return;
+            
+            const shareObj = {
+                type: 'savings_share',
+                version: 1,
+                goalId: g.id,
+                name: g.name,
+                target: g.target,
+                months: g.months,
+                monthly: g.monthly,
+                owner: g.owner,
+                records: data.records.filter(r => r.goalId === gid)
+            };
+            document.getElementById('shareCode').textContent = btoa(JSON.stringify(shareObj));
+            showModal('shareModal');
         }
+        
+        function copyCode() {
+            const code = document.getElementById('shareCode').textContent;
+            navigator.clipboard.writeText(code).then(() => alert('已复制！'));
+        }
+        
+        // 加入
+        document.getElementById('joinForm').onsubmit = function(e) {
+            e.preventDefault();
+            try {
+                const code = document.getElementById('jCode').value.trim();
+                const shareObj = JSON.parse(atob(code));
+                
+                if (shareObj.type !== 'savings_share') throw new Error('无效的分享码');
+                
+                const data = loadData();
+                const user = getUser();
+                
+                // 检查是否已存在
+                const existing = data.goals.find(g => g.id === shareObj.goalId);
+                if (existing) {
+                    if (!existing.members) existing.members = [];
+                    if (!existing.members.includes(user) && existing.owner !== user) {
+                        existing.members.push(user);
+                        saveData(data);
+                        alert('✅ 成功加入计划！');
+                    } else {
+                        alert('你已经是这个计划的成员了');
+                    }
+                } else {
+                    // 添加新计划
+                    data.goals.push({
+                        id: shareObj.goalId,
+                        name: shareObj.name,
+                        target: shareObj.target,
+                        months: shareObj.months,
+                        monthly: shareObj.monthly,
+                        type: 'shared',
+                        owner: shareObj.owner,
+                        members: [user],
+                        created: new Date().toISOString()
+                    });
+                    // 导入记录
+                    shareObj.records.forEach(r => {
+                        if (!data.records.find(x => x.id === r.id)) {
+                            data.records.push(r);
+                        }
+                    });
+                    saveData(data);
+                    alert('✅ 成功加入共享计划！');
+                }
+                
+                closeModal('joinModal');
+                this.reset();
+                render();
+            } catch (err) {
+                alert('❌ 分享码无效：' + err.message);
+            }
+        };
+        
+        // 删除
+        function delGoal(gid) {
+            if (!confirm('确定删除？')) return;
+            const data = loadData();
+            data.goals = data.goals.filter(g => g.id !== gid);
+            data.records = data.records.filter(r => r.goalId !== gid);
+            saveData(data);
+            render();
+        }
+        
+        // 用户设置
+        document.getElementById('userForm').onsubmit = function(e) {
+            e.preventDefault();
+            setUser(document.getElementById('uName').value);
+            closeModal('userModal');
+            render();
+        };
         
         // 弹窗控制
-        function openDepositModal(goalId, goalName) {
-            document.getElementById('depositGoalId').value = goalId;
-            document.getElementById('depositGoalName').value = goalName;
-            document.getElementById('depositModal').classList.add('active');
+        function showModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function showJoinModal() { showModal('joinModal'); }
+        function showUserModal() { 
+            document.getElementById('uName').value = getUser();
+            showModal('userModal'); 
         }
         
-        function closeDepositModal() {
-            document.getElementById('depositModal').classList.remove('active');
-        }
-        
-        // 点击弹窗外部关闭
-        window.onclick = function(event) {
-            const modal = document.getElementById('depositModal');
-            if (event.target === modal) {
-                closeDepositModal();
-            }
-        }
-        
-        // 刷新所有
-        function refreshAll() {
-            updateStats();
-            renderGoals();
-            renderRecords();
-        }
+        // 点击外部关闭
+        window.onclick = function(e) {
+            if (e.target.classList.contains('modal')) e.target.classList.remove('active');
+        };
         
         // 初始化
-        refreshAll();
-        
-        // 注册 Service Worker (PWA 支持)
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('Service Worker 已注册'))
-                .catch(err => console.log('Service Worker 注册失败', err));
-        }
-        
-        // PWA 安装提示
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            // 显示安装按钮
-            showInstallPrompt();
-        });
-        
-        function showInstallPrompt() {
-            const btn = document.createElement('button');
-            btn.innerHTML = '📲 安装到手机';
-            btn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;background:#48bb78;color:white;border:none;padding:12px 20px;border-radius:25px;font-size:1rem;box-shadow:0 4px 12px rgba(0,0,0,0.3);cursor:pointer;';
-            btn.onclick = () => {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(choice => {
-                    if (choice.outcome === 'accepted') {
-                        console.log('用户接受了安装');
-                    }
-                    deferredPrompt = null;
-                    btn.remove();
-                });
-            };
-            document.body.appendChild(btn);
-        }
+        render();
     </script>
 </body>
 </html>
