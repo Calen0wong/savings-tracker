@@ -1,22 +1,25 @@
 {
   "name": "存钱小工具",
-  "short_name": "存钱工具",
+  "short_name": "存钱",
   "description": "简单好用的存钱追踪工具",
-  "start_url": "/savings.html",
+  "start_url": "./index.html",
+  "scope": ".",
   "display": "standalone",
-  "background_color": "#667eea",
-  "theme_color": "#667eea",
+  "background_color": "#1b5e20",
+  "theme_color": "#1b5e20",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icon-192.svg",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%231b5e20'/%3E%3Ctext x='96' y='140' font-size='100' text-anchor='middle'%3E%F0%9F%92%B5%3C/text%3E%3C/svg%3E",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "icon-512.svg",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%231b5e20'/%3E%3Ctext x='256' y='380' font-size='280' text-anchor='middle'%3E%F0%9F%92%B5%3C/text%3E%3C/svg%3E",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }

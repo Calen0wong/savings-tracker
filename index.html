@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="#1b5e20">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="description" content="简单好用的存钱追踪工具">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <title>💰 存钱小工具</title>
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%23667eea'/%3E%3Ctext x='96' y='140' font-size='100' text-anchor='middle'%3E%F0%9F%92%B0%3C/text%3E%3C/svg%3E">
+    <title>💵 存钱小工具</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 50%, #85bb65 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -50,7 +50,8 @@
         .stat-value {
             font-size: 1.8rem;
             font-weight: bold;
-            color: #667eea;
+            color: #1b5e20;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
         
         .stat-label {
@@ -95,30 +96,37 @@
         
         input:focus, select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #1b5e20;
+            box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1);
         }
         
         .btn {
-            background: #667eea;
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
             color: white;
             border: none;
             padding: 12px 30px;
             border-radius: 8px;
             font-size: 1rem;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
         .btn:hover {
-            background: #5a6fd6;
+            background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
         
         .btn-success {
-            background: #48bb78;
+            background: linear-gradient(135deg, #ffd700 0%, #ffb300 100%);
+            color: #1b5e20;
+            font-weight: bold;
         }
         
         .btn-success:hover {
-            background: #38a169;
+            background: linear-gradient(135deg, #ffeb3b 0%, #ffc107 100%);
+            color: #1b5e20;
         }
         
         .btn-danger {
@@ -144,12 +152,14 @@
         }
         
         .goal-card:hover {
-            border-color: #667eea;
+            border-color: #1b5e20;
+            box-shadow: 0 4px 12px rgba(27, 94, 32, 0.15);
         }
         
         .goal-card.completed {
-            border-color: #48bb78;
-            background: #f0fff4;
+            border-color: #ffd700;
+            background: linear-gradient(135deg, #fffde7 0%, #fff9c4 100%);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
         }
         
         .goal-header {
@@ -201,13 +211,14 @@
         
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
+            background: linear-gradient(90deg, #1b5e20, #4caf50, #ffd700);
             border-radius: 10px;
             transition: width 0.5s ease;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.3);
         }
         
         .progress-fill.completed {
-            background: #48bb78;
+            background: linear-gradient(90deg, #ffd700, #ffeb3b);
         }
         
         .progress-text {
@@ -328,7 +339,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>💰 存钱小工具</h1>
+        <h1>💵 存钱小工具</h1>
         
         <!-- 统计卡片 -->
         <div class="stats-grid">
