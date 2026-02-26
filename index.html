@@ -439,21 +439,32 @@
             shareGid = gid;
             const data = loadData();
             const g = data.goals.find(x => x.id === gid);
-            if (!g) return;
+            if (!g) {
+                alert('❌ 找不到该计划');
+                return;
+            }
             
-            const shareObj = {
-                type: 'savings_share',
-                version: 1,
-                goalId: g.id,
-                name: g.name,
-                target: g.target,
-                months: g.months,
-                monthly: g.monthly,
-                owner: g.owner,
-                records: data.records.filter(r => r.goalId === gid)
-            };
-            document.getElementById('shareCode').textContent = btoa(JSON.stringify(shareObj));
-            showModal('shareModal');
+            try {
+                const shareObj = {
+                    type: 'savings_share',
+                    version: 1,
+                    goalId: g.id,
+                    name: g.name,
+                    target: g.target,
+                    months: g.months,
+                    monthly: g.monthly,
+                    owner: g.owner,
+                    records: data.records.filter(r => r.goalId === gid)
+                };
+                // 使用 encodeURIComponent 处理中文
+                const jsonStr = JSON.stringify(shareObj);
+                const encoded = btoa(encodeURIComponent(jsonStr));
+                document.getElementById('shareCode').textContent = encoded;
+                showModal('shareModal');
+            } catch (err) {
+                alert('❌ 生成分享码失败：' + err.message);
+                console.error(err);
+            }
         }
         
         function copyCode() {
@@ -466,7 +477,8 @@
             e.preventDefault();
             try {
                 const code = document.getElementById('jCode').value.trim();
-                const shareObj = JSON.parse(atob(code));
+                const decoded = decodeURIComponent(atob(code));
+                const shareObj = JSON.parse(decoded);
                 
                 if (shareObj.type !== 'savings_share') throw new Error('无效的分享码');
                 
