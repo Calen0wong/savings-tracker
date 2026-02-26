@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>💵 存钱小工具 - v4.3</title>
+<title>💵 存钱小工具 - v4.4</title>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
 <style>
@@ -54,7 +54,7 @@ input,select,textarea{width:100%;padding:12px;border:2px solid #e0e0e0;border-ra
 .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .close-btn{font-size:1.5rem;cursor:pointer;color:#999}
 .share-box{background:#f8f9fa;padding:15px;border-radius:8px;border:2px dashed #ccc;font-family:monospace;font-size:0.8rem;word-break:break-all;margin:10px 0}
-.empty{text-align:center;padding:30px;color:#999}
+.empty-state{text-align:center;padding:30px;color:#999}
 .version-tag{position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.4);color:white;padding:4px 12px;border-radius:20px;font-size:0.75rem}
 </style>
 </head>
@@ -74,51 +74,36 @@ input,select,textarea{width:100%;padding:12px;border:2px solid #e0e0e0;border-ra
 
 <div class="section">
 <h2>🎯 新建计划</h2>
-<form id="createForm" onsubmit="handleCreate(event); return false;">
-<div class="form-group">
-<label>计划名称</label>
-<input type="text" id="gName" placeholder="例如：买新车" required>
-</div>
-<div class="form-group">
-<label>目标金额 (¥)</label>
-<input type="number" id="gTarget" placeholder="100000" min="1" required>
-</div>
-<div class="form-group">
-<label>计划时长（月）</label>
-<input type="number" id="gMonths" placeholder="24" min="1" required>
-</div>
-<div class="form-group">
-<label>计划类型</label>
-<select id="gType">
-<option value="private">🔒 私人计划 - 仅自己可见</option>
-<option value="family">👨‍👩‍👧‍👦 家庭计划 - 邀请成员共享</option>
-</select>
-</div>
-<button type="submit" class="btn">✨ 创建计划</button>
+<form id="createForm">
+<div class="form-group"><label>计划名称</label><input type="text" id="gName" placeholder="例如：买新车" required></div>
+<div class="form-group"><label>目标金额 (¥)</label><input type="number" id="gTarget" placeholder="100000" min="1" required></div>
+<div class="form-group"><label>计划时长（月）</label><input type="number" id="gMonths" placeholder="24" min="1" required></div>
+<div class="form-group"><label>计划类型</label><select id="gType"><option value="private">🔒 私人计划</option><option value="family">👨‍👩‍👧‍👦 家庭计划</option></select></div>
+<button type="submit" class="btn" id="createBtn">✨ 创建计划</button>
 </form>
 </div>
 
 <div class="section">
 <div class="plan-tabs">
-<div class="plan-tab active" onclick="switchTab('all', this)">全部</div>
-<div class="plan-tab" onclick="switchTab('private', this)">🔒 私人</div>
-<div class="plan-tab" onclick="switchTab('family', this)">👨‍👩‍👧‍👦 家庭</div>
+<div class="plan-tab active" data-tab="all">全部</div>
+<div class="plan-tab" data-tab="private">🔒 私人</div>
+<div class="plan-tab" data-tab="family">👨‍👩‍👧‍👦 家庭</div>
 </div>
 <h2 id="planTitle">📋 我的计划</h2>
-<div id="goalsList"><div class="empty">还没有计划，创建一个吧！</div></div>
+<div id="goalsList"><div class="empty-state">还没有计划，创建一个吧！</div></div>
 </div>
 
 <div class="section">
 <h2>📝 最近存入记录</h2>
-<div id="recordsList"><div class="empty">还没有记录</div></div>
+<div id="recordsList"><div class="empty-state">还没有记录</div></div>
 </div>
 </div>
-<div class="version-tag">v4.3</div>
+<div class="version-tag">v4.4</div>
 
 <div class="modal" id="depositModal">
 <div class="modal-content">
 <div class="modal-header"><h3>💰 存入金额</h3><span class="close-btn" onclick="closeModal('depositModal')">&times;</span></div>
-<form id="depositForm" onsubmit="handleDeposit(event); return false;">
+<form id="depositForm">
 <input type="hidden" id="dGoalId">
 <div class="form-group"><label>计划名称</label><input type="text" id="dGoalName" readonly style="background:#f5f5f5"></div>
 <div class="form-group"><label>存入金额 (¥)</label><input type="number" id="dAmount" placeholder="5000" min="1" required></div>
@@ -141,7 +126,7 @@ input,select,textarea{width:100%;padding:12px;border:2px solid #e0e0e0;border-ra
 <div class="modal-content">
 <div class="modal-header"><h3>👋 加入家庭计划</h3><span class="close-btn" onclick="closeModal('joinModal')">&times;</span></div>
 <p style="color:#666;margin-bottom:10px">加入后即可与家人实时共享：</p>
-<form id="joinForm" onsubmit="handleJoin(event); return false;">
+<form id="joinForm">
 <div class="form-group"><label>粘贴分享码</label><textarea id="joinCode" rows="4" placeholder="请粘贴分享码..." required></textarea></div>
 <button type="submit" class="btn" style="width:100%">立即加入</button>
 </form>
@@ -151,7 +136,7 @@ input,select,textarea{width:100%;padding:12px;border:2px solid #e0e0e0;border-ra
 <div class="modal" id="userModal">
 <div class="modal-content">
 <div class="modal-header"><h3>设置名称</h3><span class="close-btn" onclick="closeModal('userModal')">&times;</span></div>
-<form id="userForm" onsubmit="handleUser(event); return false;">
+<form id="userForm">
 <div class="form-group"><label>你的名字</label><input type="text" id="userNameInput" placeholder="例如：爸爸" required></div>
 <button type="submit" class="btn" style="width:100%">保存</button>
 </form>
@@ -159,494 +144,58 @@ input,select,textarea{width:100%;padding:12px;border:2px solid #e0e0e0;border-ra
 </div>
 
 <script>
-// Firebase 配置
-const firebaseConfig = {
-  apiKey: "AIzaSyDemo",
-  authDomain: "demo.firebaseapp.com",
-  databaseURL: "https://demo-default-rtdb.firebaseio.com",
-  projectId: "demo",
-  storageBucket: "demo.appspot.com",
-  messagingSenderId: "123",
-  appId: "1:123:web:demo"
-};
+// 配置
+const firebaseConfig={apiKey:"AI",authDomain:"d.firebaseapp.com",databaseURL:"https://d.firebaseio.com",projectId:"d",storageBucket:"d.appspot.com",messagingSenderId:"1",appId:"1:1"};
+let db=null,syncListeners={};
+try{firebase.initializeApp(firebaseConfig);db=firebase.database()}catch(e){console.log(e)}
+const STORAGE_KEY="savings_v4_data",USER_KEY="savings_v4_user";
+let currentTab="all";
+function getUser(){return localStorage.getItem(USER_KEY)||"我"}
+function setUser(n){localStorage.setItem(USER_KEY,n)}
+function loadData(){try{const d=localStorage.getItem(STORAGE_KEY);return d?JSON.parse(d):{goals:[],records:[]}}catch(e){return{goals:[],records:[]}}}
+function saveData(d){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(d));return true}catch(e){alert("保存失败");return false}}
+function genId(){return Date.now().toString(36)+Math.random().toString(36).substr(2,6)}
+function fmtMoney(n){return"¥"+parseFloat(n).toLocaleString("zh-CN",{maximumFractionDigits:0})}
+function getSaved(gid,recs){return recs.filter(r=>r.goalId===gid).reduce((s,r)=>s+r.amount,0)}
 
-let db = null;
-let syncListeners = {};
+// 同步
+function startSync(gid){if(!db||syncListeners[gid])return;const ref=db.ref("plans/"+gid);syncListeners[gid]=ref.on("value",(s)=>{const c=s.val();if(!c)return;const l=loadData();const i=l.goals.findIndex(g=>g.id===gid);if(i<0)return;l.goals[i].name=c.goal.name;l.goals[i].target=c.goal.target;l.goals[i].months=c.goal.months;l.goals[i].monthly=c.goal.monthly;l.goals[i].members=c.goal.members||[];if(c.records)c.records.forEach(r=>{if(!l.records.find(x=>x.id===r.id))l.records.push(r)});saveData(l);render();updateSyncBar()})}
+function stopSync(gid){if(syncListeners[gid]){db.ref("plans/"+gid).off("value",syncListeners[gid]);delete syncListeners[gid];updateSyncBar()}}
+function uploadPlan(gid){if(!db)return;const d=loadData(),g=d.goals.find(x=>x.id===gid),r=d.records.filter(x=>x.goalId===gid);if(g)db.ref("plans/"+gid).set({goal:{...g,lastUpdate:Date.now()},records:r})}
+function updateSyncBar(){const c=Object.keys(syncListeners).length;const b=document.getElementById("syncBar");if(c>0){b.classList.add("active");b.textContent="🔄 "+c+"个计划同步中"}else{b.classList.remove("active");b.textContent="📱 私人计划仅本机存储 | 👥 家庭计划实时共享"}}
+function initSync(){loadData().goals.filter(g=>g.type==="family").forEach(g=>startSync(g.id))}
 
-try {
-  firebase.initializeApp(firebaseConfig);
-  db = firebase.database();
-  console.log("Firebase OK");
-} catch(e) {
-  console.log("Firebase Error:", e);
-}
-
-const STORAGE_KEY = "savings_v4_data";
-const USER_KEY = "savings_v4_user";
-let currentTab = "all";
-
-function getUser() {
-  return localStorage.getItem(USER_KEY) || "我";
-}
-
-function setUser(name) {
-  localStorage.setItem(USER_KEY, name);
-}
-
-function loadData() {
-  try {
-    const d = localStorage.getItem(STORAGE_KEY);
-    return d ? JSON.parse(d) : {goals: [], records: []};
-  } catch(e) {
-    return {goals: [], records: []};
-  }
-}
-
-function saveData(data) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    return true;
-  } catch(e) {
-    alert("保存失败：" + e.message);
-    return false;
-  }
-}
-
-function genId() {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
-}
-
-function fmtMoney(n) {
-  return "¥" + parseFloat(n).toLocaleString("zh-CN", {maximumFractionDigits: 0});
-}
-
-function getSaved(goalId, records) {
-  return records.filter(r => r.goalId === goalId).reduce((s, r) => s + r.amount, 0);
-}
-
-// 同步功能
-function startSync(goalId) {
-  if (!db || syncListeners[goalId]) return;
-  console.log("开始同步:", goalId);
-  
-  const ref = db.ref("plans/" + goalId);
-  syncListeners[goalId] = ref.on("value", (snapshot) => {
-    const cloud = snapshot.val();
-    if (!cloud) return;
-    
-    const local = loadData();
-    const idx = local.goals.findIndex(g => g.id === goalId);
-    if (idx < 0) return;
-    
-    local.goals[idx].name = cloud.goal.name;
-    local.goals[idx].target = cloud.goal.target;
-    local.goals[idx].months = cloud.goal.months;
-    local.goals[idx].monthly = cloud.goal.monthly;
-    local.goals[idx].members = cloud.goal.members || [];
-    
-    if (cloud.records) {
-      cloud.records.forEach(cr => {
-        if (!local.records.find(r => r.id === cr.id)) {
-          local.records.push(cr);
-        }
-      });
-    }
-    
-    saveData(local);
-    render();
-    updateSyncBar();
-  });
-  
-  updateSyncBar();
-}
-
-function stopSync(goalId) {
-  if (syncListeners[goalId]) {
-    db.ref("plans/" + goalId).off("value", syncListeners[goalId]);
-    delete syncListeners[goalId];
-    updateSyncBar();
-  }
-}
-
-function uploadPlan(goalId) {
-  if (!db) return;
-  const data = loadData();
-  const goal = data.goals.find(g => g.id === goalId);
-  const recs = data.records.filter(r => r.goalId === goalId);
-  if (goal) {
-    db.ref("plans/" + goalId).set({
-      goal: {...goal, lastUpdate: Date.now()},
-      records: recs
-    });
-  }
-}
-
-function updateSyncBar() {
-  const count = Object.keys(syncListeners).length;
-  const bar = document.getElementById("syncBar");
-  if (count > 0) {
-    bar.classList.add("active");
-    bar.textContent = "🔄 " + count + "个家庭计划同步中";
-  } else {
-    bar.classList.remove("active");
-    bar.textContent = "📱 私人计划仅本机存储 | 👥 家庭计划实时共享";
-  }
-}
-
-function initSync() {
-  loadData().goals.filter(g => g.type === "family").forEach(g => startSync(g.id));
-}
-
-// 权限检查
-function canView(goal, user) {
-  if (goal.type === "private") return goal.owner === user;
-  if (goal.owner === user) return true;
-  if (goal.members && goal.members.includes(user)) return true;
-  return false;
-}
-
-function isOwner(goal) {
-  return goal.owner === getUser();
-}
-
-function canDeposit(goal) {
-  const user = getUser();
-  if (goal.type === "private") return goal.owner === user;
-  return canView(goal, user);
-}
+// 权限
+function canView(g,u){if(g.type==="private")return g.owner===u;if(g.owner===u)return true;if(g.members&&g.members.includes(u))return true;return false}
+function isOwner(g){return g.owner===getUser()}
+function canDeposit(g){const u=getUser();if(g.type==="private")return g.owner===u;return canView(g,u)}
 
 // 渲染
-function switchTab(tab, el) {
-  currentTab = tab;
-  document.querySelectorAll(".plan-tab").forEach(t => t.classList.remove("active"));
-  if (el) el.classList.add("active");
-  
-  const titles = {all: "📋 全部计划", private: "🔒 私人计划", family: "👨‍👩‍👧‍👦 家庭计划"};
-  document.getElementById("planTitle").textContent = titles[tab];
-  render();
-}
-
-function render() {
-  const data = loadData();
-  const user = getUser();
-  
-  document.getElementById("displayName").textContent = user;
-  
-  const myGoals = data.goals.filter(g => canView(g, user));
-  const total = myGoals.reduce((s, g) => s + getSaved(g.id, data.records), 0);
-  document.getElementById("statTotal").textContent = fmtMoney(total);
-  document.getElementById("statCount").textContent = myGoals.length;
-  
-  let visible = myGoals;
-  if (currentTab === "private") visible = myGoals.filter(g => g.type === "private");
-  if (currentTab === "family") visible = myGoals.filter(g => g.type === "family");
-  
-  const list = document.getElementById("goalsList");
-  if (visible.length === 0) {
-    list.innerHTML = "<div class="empty">还没有计划，创建一个吧！</div>";
-  } else {
-    list.innerHTML = visible.map(g => {
-      const saved = getSaved(g.id, data.records);
-      const pct = Math.min(100, (saved / g.target * 100)).toFixed(1);
-      const isDone = saved >= g.target;
-      const isFamily = g.type === "family";
-      const syncing = !!syncListeners[g.id];
-      const members = isFamily ? [g.owner || "我", ...(g.members || [])] : [];
-      
-      let html = "<div class="goal-card " + (isFamily ? "family"" : "private"") + ">";
-      html += "<div class="goal-header"><span class="goal-name">" + g.name + "</span>";
-      html += "<span class="badge " + (isFamily ? "badge-family"" : "badge-private"") + ">";
-      html += isFamily ? (syncing ? "🔄 " : "") + "家庭" : "私人";
-      html += "</span></div>";
-      
-      if (isFamily && members.length > 0) {
-        html += "<div class="members">";
-        members.forEach(m => {
-          html += "<span class="member-tag " + (m === user ? "me"" : """) + ">";
-          html += (m === user ? "我" : m) + (m === g.owner ? " 👑" : "");
-          html += "</span>";
-        });
-        html += "</div>";
-      }
-      
-      html += "<div class="goal-stats">";
-      html += "<div><strong>" + fmtMoney(g.target) + "</strong><br>目标</div>";
-      html += "<div><strong>" + fmtMoney(saved) + "</strong><br>已存</div>";
-      html += "<div><strong>" + fmtMoney(Math.max(0, g.target - saved)) + "</strong><br>剩余</div>";
-      html += "<div><strong>" + fmtMoney(g.monthly) + "</strong><br>每月</div>";
-      html += "</div>";
-      
-      html += "<div class="progress-bar"><div class="progress-fill" style="width:" + pct + "%"></div></div>";
-      html += "<div style="text-align:center;font-size:0.9rem;color:#666;margin:5px 0">" + pct + "% " + (isDone ? "✅ 已完成" : "⏳ 进行中") + "</div>";
-      
-      html += "<div class="actions">";
-      if (canDeposit(g)) {
-        html += "<button class="btn btn-gold btn-small" onclick="openDeposit(&quot;" + g.id + "&quot;,&quot;" + g.name + "&quot;)">存入</button>";
-      }
-      if (isFamily && isOwner(g)) {
-        html += "<button class="btn btn-outline btn-small" onclick="openInvite(&quot;" + g.id + "&quot;)">邀请</button>";
-      }
-      if (isOwner(g)) {
-        html += "<button class="btn btn-danger btn-small" onclick="deleteGoal(&quot;" + g.id + "&quot;)">删除</button>";
-      }
-      html += "</div></div>";
-      
-      return html;
-    }).join("");
-  }
-  
-  const vids = myGoals.map(g => g.id);
-  const recs = data.records.filter(r => vids.includes(r.goalId)).sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 15);
-  
-  const rlist = document.getElementById("recordsList");
-  if (recs.length === 0) {
-    rlist.innerHTML = "<div class="empty">还没有记录</div>";
-  } else {
-    rlist.innerHTML = recs.map(r => {
-      const g = data.goals.find(x => x.id === r.goalId);
-      return "<div style="padding:10px;border-bottom:1px solid #f0f0f0">" +
-        "<div style="display:flex;justify-content:space-between">" +
-        "<span><strong style="color:#1b5e20">+" + fmtMoney(r.amount) + "</strong> " + (g ? g.name : "") + "</span>" +
-        "<span style="color:#999;font-size:0.8rem">" + r.date.slice(0, 10) + "</span>" +
-        "</div>" +
-        "<div style="font-size:0.85rem;color:#666">" + (r.who || "我") + " 存入" + (r.note ? " · " + r.note : "") + "</div>" +
-        "</div>";
-    }).join("");
-  }
-}
+function switchTab(t){currentTab=t;document.querySelectorAll(".plan-tab").forEach(x=>{if(x.dataset.tab===t)x.classList.add("active");else x.classList.remove("active")});const titles={all:"📋 全部计划",private:"🔒 私人计划",family:"👨‍👩‍👧‍👦 家庭计划"};document.getElementById("planTitle").textContent=titles[t];render()}
+function render(){const d=loadData(),u=getUser();document.getElementById("displayName").textContent=u;const my=d.goals.filter(g=>canView(g,u));const total=my.reduce((s,g)=>s+getSaved(g.id,d.records),0);document.getElementById("statTotal").textContent=fmtMoney(total);document.getElementById("statCount").textContent=my.length;let vis=my;if(currentTab==="private")vis=my.filter(g=>g.type==="private");if(currentTab==="family")vis=my.filter(g=>g.type==="family");const list=document.getElementById("goalsList");if(vis.length===0){list.innerHTML="<div class=empty-state>还没有计划，创建一个吧！</div>"}else{list.innerHTML=vis.map(g=>{const saved=getSaved(g.id,d.records);const pct=Math.min(100,(saved/g.target*100)).toFixed(1);const done=saved>=g.target;const fam=g.type==="family";const sync=!!syncListeners[g.id];const mems=fam?[g.owner||"我",...(g.members||[])]:[];let html="<div class=goal-card "+(fam?"family":"private")+">";html+="<div class=goal-header><span class=goal-name>"+g.name+"</span>";html+="<span class=badge "+(fam?"badge-family":"badge-private")+">"+(fam?(sync?"🔄 ":"")+"家庭":"私人")+"</span></div>";if(fam&&mems.length){html+="<div class=members>";mems.forEach(m=>{html+="<span class=member-tag "+(m===u?"me":"")+">"+(m===u?"我":m)+(m===g.owner?" 👑":"")+"</span>"});html+="</div>"}html+="<div class=goal-stats><div><strong>"+fmtMoney(g.target)+"</strong><br>目标</div><div><strong>"+fmtMoney(saved)+"</strong><br>已存</div><div><strong>"+fmtMoney(Math.max(0,g.target-saved))+"</strong><br>剩余</div><div><strong>"+fmtMoney(g.monthly)+"</strong><br>每月</div></div>";html+="<div class=progress-bar><div class=progress-fill style=width:"+pct+"%></div></div>";html+="<div style=text-align:center;font-size:0.9rem;color:#666;margin:5px 0>"+pct+"% "+(done?"✅ 已完成":"⏳ 进行中")+"</div>";html+="<div class=actions>";if(canDeposit(g)){html+='<button class="btn btn-gold btn-small" data-gid="'+g.id+'" data-gname="'+g.name+'" onclick="handleDepositClick(this)">存入</button>'}if(fam&&isOwner(g)){html+='<button class="btn btn-outline btn-small" data-gid="'+g.id+'" onclick="handleInviteClick(this)">邀请</button>'}if(isOwner(g)){html+='<button class="btn btn-danger btn-small" data-gid="'+g.id+'" onclick="handleDeleteClick(this)">删除</button>'}html+="</div></div>";return html}).join("")}const vids=my.map(g=>g.id);const recs=d.records.filter(r=>vids.includes(r.goalId)).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,15);const rlist=document.getElementById("recordsList");if(recs.length===0){rlist.innerHTML="<div class=empty-state>还没有记录</div>"}else{rlist.innerHTML=recs.map(r=>{const g=d.goals.find(x=>x.id===r.goalId);return"<div style=padding:10px;border-bottom:1px solid #f0f0f0><div style=display:flex;justify-content:space-between><span><strong style=color:#1b5e20>+"+fmtMoney(r.amount)+"</strong> "+(g?g.name:"")+"</span><span style=color:#999;font-size:0.8rem>"+r.date.slice(0,10)+"</span></div><div style=font-size:0.85rem;color:#666>"+(r.who||"我")+" 存入"+(r.note?" · "+r.note:"")+"</div></div>"}).join("")}}
 
 // 事件处理
-function handleCreate(e) {
-  e.preventDefault();
-  console.log("创建计划...");
-  
-  const name = document.getElementById("gName").value.trim();
-  const target = parseFloat(document.getElementById("gTarget").value);
-  const months = parseInt(document.getElementById("gMonths").value);
-  const type = document.getElementById("gType").value;
-  
-  if (!name) {
-    alert("请输入计划名称");
-    return;
-  }
-  if (!target || target <= 0) {
-    alert("请输入目标金额");
-    return;
-  }
-  if (!months || months <= 0) {
-    alert("请输入计划时长");
-    return;
-  }
-  
-  const data = loadData();
-  const user = getUser();
-  
-  const g = {
-    id: genId(),
-    name: name,
-    target: target,
-    months: months,
-    monthly: (target / months).toFixed(2),
-    type: type,
-    owner: user,
-    members: [],
-    createdAt: new Date().toISOString()
-  };
-  
-  console.log("新计划:", g);
-  data.goals.push(g);
-  
-  if (!saveData(data)) {
-    return;
-  }
-  
-  console.log("数据已保存到本地");
-  
-  // 清空表单
-  document.getElementById("gName").value = "";
-  document.getElementById("gTarget").value = "";
-  document.getElementById("gMonths").value = "";
-  
-  // 渲染
-  render();
-  
-  // 如果是家庭计划，尝试云端同步
-  if (type === "family" && db) {
-    uploadPlan(g.id);
-    startSync(g.id);
-    alert("✅ 家庭计划创建成功！点击计划卡片上的"邀请"按钮添加成员");
-  } else {
-    alert("✅ 私人计划创建成功！");
-  }
-}
+function handleDepositClick(btn){const gid=btn.dataset.gid;const gname=btn.dataset.gname;document.getElementById("dGoalId").value=gid;document.getElementById("dGoalName").value=gname;showModal("depositModal")}
+function handleInviteClick(btn){const gid=btn.dataset.gid;const d=loadData();const g=d.goals.find(x=>x.id===gid);if(!g)return;const share={type:"savings_v4",version:4,planId:g.id,name:g.name,target:g.target,months:g.months,monthly:g.monthly,owner:g.owner};document.getElementById("inviteCode").textContent=btoa(JSON.stringify(share));showModal("inviteModal")}
+function handleDeleteClick(btn){const gid=btn.dataset.gid;if(!confirm("确定删除？"))return;stopSync(gid);const d=loadData();d.goals=d.goals.filter(g=>g.id!==gid);d.records=d.records.filter(r=>r.goalId!==gid);saveData(d);render()}
 
-function handleDeposit(e) {
-  e.preventDefault();
-  
-  const gid = document.getElementById("dGoalId").value;
-  const amount = parseFloat(document.getElementById("dAmount").value);
-  const note = document.getElementById("dNote").value;
-  
-  if (!amount || amount <= 0) {
-    alert("请输入有效金额");
-    return;
-  }
-  
-  const data = loadData();
-  const goal = data.goals.find(g => g.id === gid);
-  
-  data.records.push({
-    id: genId(),
-    goalId: gid,
-    amount: amount,
-    note: note,
-    who: getUser(),
-    date: new Date().toISOString()
-  });
-  
-  saveData(data);
-  
-  if (goal && goal.type === "family") {
-    uploadPlan(gid);
-  }
-  
-  closeModal("depositModal");
-  document.getElementById("dAmount").value = "";
-  document.getElementById("dNote").value = "";
-  render();
-  
-  if (goal && goal.type === "family") {
-    alert("✅ 存入成功！已同步给家人");
-  }
-}
+// 表单提交
+document.getElementById("createForm").addEventListener("submit",function(e){e.preventDefault();const name=document.getElementById("gName").value.trim();const target=parseFloat(document.getElementById("gTarget").value);const months=parseInt(document.getElementById("gMonths").value);const type=document.getElementById("gType").value;if(!name||!target||!months){alert("请填写完整");return}const d=loadData();const g={id:genId(),name:name,target:target,months:months,monthly:(target/months).toFixed(2),type:type,owner:getUser(),members:[],createdAt:new Date().toISOString()};d.goals.push(g);if(!saveData(d))return;this.reset();render();if(type==="family"&&db){uploadPlan(g.id);startSync(g.id);alert("✅ 家庭计划创建成功！点击"邀请"添加成员")}else{alert("✅ 私人计划创建成功！")}});
+document.getElementById("depositForm").addEventListener("submit",function(e){e.preventDefault();const gid=document.getElementById("dGoalId").value;const amt=parseFloat(document.getElementById("dAmount").value);const note=document.getElementById("dNote").value;if(!amt){alert("请输入金额");return}const d=loadData();const goal=d.goals.find(g=>g.id===gid);d.records.push({id:genId(),goalId:gid,amount:amt,note:note,who:getUser(),date:new Date().toISOString()});saveData(d);if(goal&&goal.type==="family")uploadPlan(gid);closeModal("depositModal");this.reset();render();if(goal&&goal.type==="family")alert("✅ 存入成功！已同步给家人")});
+document.getElementById("joinForm").addEventListener("submit",function(e){e.preventDefault();try{const code=document.getElementById("joinCode").value.trim();const share=JSON.parse(atob(code));if(share.type!=="savings_v4")throw new Error("无效分享码");const d=loadData();const u=getUser();if(d.goals.find(g=>g.id===share.planId)){alert("你已在该计划中");return}d.goals.push({id:share.planId,name:share.name,target:share.target,months:share.months,monthly:share.monthly,type:"family",owner:share.owner,members:[u],joinedAt:new Date().toISOString()});saveData(d);startSync(share.planId);closeModal("joinModal");this.reset();render();alert("✅ 加入成功！数据将实时同步")}catch(err){alert("❌ 加入失败："+err.message)}});
+document.getElementById("userForm").addEventListener("submit",function(e){e.preventDefault();setUser(document.getElementById("userNameInput").value.trim()||"我");closeModal("userModal");render()});
 
-function handleJoin(e) {
-  e.preventDefault();
-  
-  try {
-    const code = document.getElementById("joinCode").value.trim();
-    const share = JSON.parse(atob(code));
-    
-    if (share.type !== "savings_v4") {
-      throw new Error("无效的分享码");
-    }
-    
-    const data = loadData();
-    const user = getUser();
-    
-    if (data.goals.find(g => g.id === share.planId)) {
-      alert("你已经在该计划中了");
-      return;
-    }
-    
-    data.goals.push({
-      id: share.planId,
-      name: share.name,
-      target: share.target,
-      months: share.months,
-      monthly: share.monthly,
-      type: "family",
-      owner: share.owner,
-      members: [user],
-      joinedAt: new Date().toISOString()
-    });
-    
-    saveData(data);
-    startSync(share.planId);
-    
-    closeModal("joinModal");
-    document.getElementById("joinCode").value = "";
-    render();
-    alert("✅ 加入成功！该计划的数据将实时同步");
-    
-  } catch (err) {
-    alert("❌ 加入失败：" + err.message);
-    console.error(err);
-  }
-}
+// Tab切换
+document.querySelectorAll(".plan-tab").forEach(tab=>{tab.addEventListener("click",function(){switchTab(this.dataset.tab)})});
 
-function handleUser(e) {
-  e.preventDefault();
-  setUser(document.getElementById("userNameInput").value.trim() || "我");
-  closeModal("userModal");
-  render();
-}
-
-function openDeposit(gid, gname) {
-  document.getElementById("dGoalId").value = gid;
-  document.getElementById("dGoalName").value = gname;
-  showModal("depositModal");
-}
-
-function openInvite(gid) {
-  const data = loadData();
-  const g = data.goals.find(x => x.id === gid);
-  if (!g) return;
-  
-  const shareObj = {
-    type: "savings_v4",
-    version: 4,
-    planId: g.id,
-    name: g.name,
-    target: g.target,
-    months: g.months,
-    monthly: g.monthly,
-    owner: g.owner
-  };
-  
-  document.getElementById("inviteCode").textContent = btoa(JSON.stringify(shareObj));
-  showModal("inviteModal");
-}
-
-function copyInvite() {
-  navigator.clipboard.writeText(document.getElementById("inviteCode").textContent).then(() => {
-    alert("已复制！");
-  });
-}
-
-function deleteGoal(gid) {
-  if (!confirm("确定删除此计划？删除后无法恢复。")) return;
-  
-  stopSync(gid);
-  
-  const data = loadData();
-  data.goals = data.goals.filter(g => g.id !== gid);
-  data.records = data.records.filter(r => r.goalId !== gid);
-  saveData(data);
-  render();
-}
-
-function showModal(id) {
-  document.getElementById(id).classList.add("active");
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove("active");
-}
-
-function showJoinModal() {
-  showModal("joinModal");
-}
-
-function showUserModal() {
-  document.getElementById("userNameInput").value = getUser();
-  showModal("userModal");
-}
-
-// 点击外部关闭弹窗
-window.onclick = function(e) {
-  if (e.target.classList.contains("modal")) {
-    e.target.classList.remove("active");
-  }
-};
-
-// 页面加载
-window.onload = function() {
-  console.log("页面加载完成");
-  initSync();
-  render();
-  console.log("初始化完成，数据:", loadData());
-};
+// 其他函数
+function copyInvite(){navigator.clipboard.writeText(document.getElementById("inviteCode").textContent).then(()=>alert("已复制！"))}
+function showModal(id){document.getElementById(id).classList.add("active")}
+function closeModal(id){document.getElementById(id).classList.remove("active")}
+function showJoinModal(){showModal("joinModal")}
+function showUserModal(){document.getElementById("userNameInput").value=getUser();showModal("userModal")}
+window.onclick=function(e){if(e.target.classList.contains("modal"))e.target.classList.remove("active")}
+window.onload=function(){initSync();render()}
 </script>
 </body>
 </html>
