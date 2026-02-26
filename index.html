@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="简单好用的存钱追踪工具">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>💰 存钱小工具</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .section h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.3rem;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #5a6fd6;
+        }
+        
+        .btn-success {
+            background: #48bb78;
+        }
+        
+        .btn-success:hover {
+            background: #38a169;
+        }
+        
+        .btn-danger {
+            background: #f56565;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+        
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+        
+        .goals-list {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .goal-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: border-color 0.3s;
+        }
+        
+        .goal-card:hover {
+            border-color: #667eea;
+        }
+        
+        .goal-card.completed {
+            border-color: #48bb78;
+            background: #f0fff4;
+        }
+        
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .goal-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .goal-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: #ebf8ff;
+            color: #3182ce;
+        }
+        
+        .status-completed {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .goal-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-fill.completed {
+            background: #48bb78;
+        }
+        
+        .progress-text {
+            text-align: center;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        
+        .goal-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .records-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .record-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .record-item:last-child {
+            border-bottom: none;
+        }
+        
+        .record-amount {
+            font-weight: bold;
+            color: #48bb78;
+        }
+        
+        .record-date {
+            color: #999;
+            font-size: 0.85rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            margin-bottom: 20px;
+        }
+        
+        .close-btn {
+            float: right;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .close-btn:hover {
+            color: #333;
+        }
+        
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0 5px;
+        }
+        
+        .delete-btn:hover {
+            color: #f56565;
+        }
+        
+        .goal-records {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 0.85rem;
+        }
+        
+        .goal-record-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            color: #666;
+        }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 存钱小工具</h1>
+        
+        <!-- 统计卡片 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="statTotal">¥0</div>
+                <div class="stat-label">总存款</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statGoals">0</div>
+                <div class="stat-label">目标数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statCompleted">0</div>
+                <div class="stat-label">已完成</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statMonth">¥0</div>
+                <div class="stat-label">本月存入</div>
+            </div>
+        </div>
+        
+        <!-- 新建目标 -->
+        <div class="section">
+            <h2>🎯 新建存钱目标</h2>
+            <form id="createForm">
+                <div class="form-group">
+                    <label>目标名称</label>
+                    <input type="text" id="goalName" placeholder="例如：旅行基金" required>
+                </div>
+                <div class="form-group">
+                    <label>目标金额 (¥)</label>
+                    <input type="number" id="goalTarget" placeholder="10000" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>计划月数</label>
+                    <input type="number" id="goalMonths" placeholder="12" min="1" required>
+                </div>
+                <button type="submit" class="btn">创建目标</button>
+            </form>
+        </div>
+        
+        <!-- 存钱目标列表 -->
+        <div class="section">
+            <h2>📋 我的目标</h2>
+            <div id="goalsList" class="goals-list">
+                <div class="empty-state">
+                    <p>还没有存钱目标，创建一个吧！</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 近期记录 -->
+        <div class="section">
+            <h2>📝 近期存入记录</h2>
+            <div id="recordsList" class="records-list">
+                <div class="empty-state">
+                    <p>还没有存入记录</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 存入弹窗 -->
+    <div class="modal" id="depositModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close-btn" onclick="closeDepositModal()">&times;</span>
+                <h3>存入金额</h3>
+            </div>
+            <form id="depositForm">
+                <input type="hidden" id="depositGoalId">
+                <div class="form-group">
+                    <label>目标</label>
+                    <input type="text" id="depositGoalName" readonly style="background: #f5f5f5">
+                </div>
+                <div class="form-group">
+                    <label>存入金额 (¥)</label>
+                    <input type="number" id="depositAmount" placeholder="1000" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>备注 (可选)</label>
+                    <input type="text" id="depositNote" placeholder="例如：工资结余">
+                </div>
+                <button type="submit" class="btn btn-success">确认存入</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // 数据管理
+        const STORAGE_KEY = 'savings_tracker_data';
+        
+        function loadData() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : { goals: [], records: [] };
+        }
+        
+        function saveData(data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+        
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+        
+        // 格式化货币
+        function formatMoney(amount) {
+            return '¥' + parseFloat(amount).toLocaleString('zh-CN', { 
+                minimumFractionDigits: 0, 
+                maximumFractionDigits: 0 
+            });
+        }
+        
+        // 获取目标已存金额
+        function getSavedAmount(goalId, records) {
+            return records.filter(r => r.goalId === goalId).reduce((sum, r) => sum + r.amount, 0);
+        }
+        
+        // 更新统计
+        function updateStats() {
+            const data = loadData();
+            const records = data.records;
+            const goals = data.goals;
+            
+            const totalSaved = records.reduce((sum, r) => sum + r.amount, 0);
+            const completedGoals = goals.filter(g => {
+                const saved = getSavedAmount(g.id, records);
+                return saved >= g.target;
+            }).length;
+            
+            const thisMonth = new Date().toISOString().slice(0, 7);
+            const monthSaved = records
+                .filter(r => r.date.startsWith(thisMonth))
+                .reduce((sum, r) => sum + r.amount, 0);
+            
+            document.getElementById('statTotal').textContent = formatMoney(totalSaved);
+            document.getElementById('statGoals').textContent = goals.length;
+            document.getElementById('statCompleted').textContent = completedGoals;
+            document.getElementById('statMonth').textContent = formatMoney(monthSaved);
+        }
+        
+        // 渲染目标列表
+        function renderGoals() {
+            const data = loadData();
+            const container = document.getElementById('goalsList');
+            
+            if (data.goals.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>还没有存钱目标，创建一个吧！</p></div>';
+                return;
+            }
+            
+            container.innerHTML = data.goals.map(goal => {
+                const saved = getSavedAmount(goal.id, data.records);
+                const progress = Math.min(100, (saved / goal.target * 100)).toFixed(1);
+                const remaining = Math.max(0, goal.target - saved);
+                const isCompleted = saved >= goal.target;
+                
+                // 获取该目标的记录
+                const goalRecords = data.records
+                    .filter(r => r.goalId === goal.id)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .slice(0, 3);
+                
+                const recordsHtml = goalRecords.length > 0 ? `
+                    <div class="goal-records">
+                        <div style="color: #999; margin-bottom: 5px;">最近存入:</div>
+                        ${goalRecords.map(r => `
+                            <div class="goal-record-item">
+                                <span>+${formatMoney(r.amount)} ${r.note ? '- ' + r.note : ''}</span>
+                                <span style="color: #999;">${r.date.slice(0, 10)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : '';
+                
+                return `
+                    <div class="goal-card ${isCompleted ? 'completed' : ''}">
+                        <div class="goal-header">
+                            <span class="goal-name">${goal.name}</span>
+                            <span class="goal-status ${isCompleted ? 'status-completed' : 'status-active'}">
+                                ${isCompleted ? '✅ 已完成' : '⏳ 进行中'}
+                            </span>
+                        </div>
+                        <div class="goal-details">
+                            <div>目标: ${formatMoney(goal.target)}</div>
+                            <div>已存: ${formatMoney(saved)}</div>
+                            <div>剩余: ${formatMoney(remaining)}</div>
+                            <div>每月: ${formatMoney(goal.monthly)}</div>
+                        </div>
+                        <div class="progress-text">${progress}%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill ${isCompleted ? 'completed' : ''}" style="width: ${progress}%"></div>
+                        </div>
+                        <div class="goal-actions">
+                            <button class="btn btn-success" onclick="openDepositModal('${goal.id}', '${goal.name}')">存入</button>
+                            <button class="btn btn-danger" onclick="deleteGoal('${goal.id}')">删除</button>
+                        </div>
+                        ${recordsHtml}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // 渲染记录列表
+        function renderRecords() {
+            const data = loadData();
+            const container = document.getElementById('recordsList');
+            
+            if (data.records.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>还没有存入记录</p></div>';
+                return;
+            }
+            
+            const sortedRecords = [...data.records]
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 10);
+            
+            container.innerHTML = sortedRecords.map(record => {
+                const goal = data.goals.find(g => g.id === record.goalId);
+                const goalName = goal ? goal.name : '未知目标';
+                return `
+                    <div class="record-item">
+                        <div>
+                            <span class="record-amount">+${formatMoney(record.amount)}</span>
+                            <span> - ${goalName}</span>
+                            ${record.note ? `<span style="color: #999;"> (${record.note})</span>` : ''}
+                        </div>
+                        <div class="record-date">${record.date.slice(0, 10)} ${record.date.slice(11, 16)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // 创建目标
+        document.getElementById('createForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('goalName').value;
+            const target = parseFloat(document.getElementById('goalTarget').value);
+            const months = parseInt(document.getElementById('goalMonths').value);
+            
+            const data = loadData();
+            data.goals.push({
+                id: generateId(),
+                name: name,
+                target: target,
+                months: months,
+                monthly: (target / months).toFixed(2),
+                created: new Date().toISOString()
+            });
+            
+            saveData(data);
+            this.reset();
+            refreshAll();
+        });
+        
+        // 存入
+        document.getElementById('depositForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const goalId = document.getElementById('depositGoalId').value;
+            const amount = parseFloat(document.getElementById('depositAmount').value);
+            const note = document.getElementById('depositNote').value;
+            
+            const data = loadData();
+            data.records.push({
+                id: generateId(),
+                goalId: goalId,
+                amount: amount,
+                note: note,
+                date: new Date().toISOString()
+            });
+            
+            saveData(data);
+            closeDepositModal();
+            this.reset();
+            refreshAll();
+            
+            // 检查是否完成目标
+            const goal = data.goals.find(g => g.id === goalId);
+            const saved = getSavedAmount(goalId, data.records);
+            if (saved >= goal.target && saved - amount < goal.target) {
+                setTimeout(() => alert(`🎉 恭喜！目标 "${goal.name}" 已达成！`), 100);
+            }
+        });
+        
+        // 删除目标
+        function deleteGoal(goalId) {
+            if (!confirm('确定要删除这个目标吗？相关的存入记录也会被删除。')) return;
+            
+            const data = loadData();
+            data.goals = data.goals.filter(g => g.id !== goalId);
+            data.records = data.records.filter(r => r.goalId !== goalId);
+            saveData(data);
+            refreshAll();
+        }
+        
+        // 弹窗控制
+        function openDepositModal(goalId, goalName) {
+            document.getElementById('depositGoalId').value = goalId;
+            document.getElementById('depositGoalName').value = goalName;
+            document.getElementById('depositModal').classList.add('active');
+        }
+        
+        function closeDepositModal() {
+            document.getElementById('depositModal').classList.remove('active');
+        }
+        
+        // 点击弹窗外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('depositModal');
+            if (event.target === modal) {
+                closeDepositModal();
+            }
+        }
+        
+        // 刷新所有
+        function refreshAll() {
+            updateStats();
+            renderGoals();
+            renderRecords();
+        }
+        
+        // 初始化
+        refreshAll();
+        
+        // 注册 Service Worker (PWA 支持)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker 已注册'))
+                .catch(err => console.log('Service Worker 注册失败', err));
+        }
+        
+        // PWA 安装提示
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // 显示安装按钮
+            showInstallPrompt();
+        });
+        
+        function showInstallPrompt() {
+            const btn = document.createElement('button');
+            btn.innerHTML = '📲 安装到手机';
+            btn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;background:#48bb78;color:white;border:none;padding:12px 20px;border-radius:25px;font-size:1rem;box-shadow:0 4px 12px rgba(0,0,0,0.3);cursor:pointer;';
+            btn.onclick = () => {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(choice => {
+                    if (choice.outcome === 'accepted') {
+                        console.log('用户接受了安装');
+                    }
+                    deferredPrompt = null;
+                    btn.remove();
+                });
+            };
+            document.body.appendChild(btn);
+        }
+    </script>
+</body>
+</html>
