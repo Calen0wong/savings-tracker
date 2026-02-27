@@ -3,7 +3,7 @@
   "short_name": "存钱工具",
   "description": "简单好用的存钱追踪工具，支持私人计划和家庭共享，多人实时同步存钱进度",
   "id": "com.savings.tracker",
-  "start_url": "index.html",
+  "start_url": ".",
   "scope": ".",
   "lang": "zh-CN",
   "dir": "ltr",
@@ -14,16 +14,28 @@
   "categories": ["finance", "productivity", "lifestyle"],
   "icons": [
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%231b5e20'/%3E%3Ctext x='96' y='140' font-size='100' text-anchor='middle'%3E%F0%9F%92%B0%3C/text%3E%3C/svg%3E",
+      "src": "icon-192.svg",
       "sizes": "192x192",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%231b5e20'/%3E%3Ctext x='256' y='380' font-size='280' text-anchor='middle'%3E%F0%9F%92%B0%3C/text%3E%3C/svg%3E",
+      "src": "icon-192-maskable.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-512.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512-maskable.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ]
 }
