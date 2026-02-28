@@ -952,6 +952,7 @@ document.addEventListener("DOMContentLoaded", function() {
             // 更新计划数据
             const idx = data.goals.findIndex(g => g.id === share.planId);
             if (idx >= 0 && cloudData.goal) {
+              // 保留当前用户在成员列表中
               data.goals[idx] = cloudData.goal;
               // 确保当前用户在成员列表中
               if (!data.goals[idx].memberIds) data.goals[idx].memberIds = [];
@@ -971,6 +972,10 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             saveLocalData(data);
             showToast("📥 已同步历史数据");
+            
+            // 重要：加入者更新成员列表到云端（但不覆盖其他数据）
+            await db.ref("plans/" + share.planId + "/goal/memberIds").set(data.goals[idx].memberIds);
+            await db.ref("plans/" + share.planId + "/goal/members").set(data.goals[idx].members);
           }
         } catch(err) {
           console.log("拉取历史数据失败:", err);
