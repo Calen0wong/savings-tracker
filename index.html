@@ -501,6 +501,17 @@ try {
 
 const STORAGE_KEY = "savings_v12_data";
 const USER_KEY = "savings_v12_user";
+const USER_ID_KEY = "savings_v12_userid";
+
+// 获取或创建用户ID（设备唯一标识，不随改名改变）
+function getUserId() {
+  let userId = localStorage.getItem(USER_ID_KEY);
+  if (!userId) {
+    userId = 'user_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    localStorage.setItem(USER_ID_KEY, userId);
+  }
+  return userId;
+}
 
 // 状态更新
 function updateStatus(status, msg) {
@@ -602,20 +613,20 @@ function genId() { return Date.now().toString(36) + Math.random().toString(36).s
 function fmtMoney(n) { return "¥" + parseFloat(n).toLocaleString("zh-CN", {maximumFractionDigits:0}); }
 function getSaved(goalId, records) { return records.filter(r => r.goalId === goalId).reduce((s, r) => s + r.amount, 0); }
 
-// 权限检查 - 核心逻辑
-function canView(goal, user) {
+// 权限检查 - 使用userId而不是用户名
+function canView(goal, userId) {
   // 私人计划：只有创建者可见
-  if (goal.type === "private") return goal.owner === user;
+  if (goal.type === "private") return goal.ownerId === userId;
   // 家庭计划：创建者和成员可见
-  if (goal.owner === user) return true;
-  if (goal.members && goal.members.includes(user)) return true;
+  if (goal.ownerId === userId) return true;
+  if (goal.memberIds && goal.memberIds.includes(userId)) return true;
   return false;
 }
-function isOwner(goal) { return goal.owner === currentUser; }
+function isOwner(goal) { return goal.ownerId === getUserId(); }
 function canDeposit(goal) { 
   // 私人：只有创建者可存入
   // 家庭：所有可见成员（创建者和加入的成员）都可存入
-  return goal.type === "private" ? isOwner(goal) : canView(goal, currentUser); 
+  return goal.type === "private" ? isOwner(goal) : canView(goal, getUserId()); 
 }
 function canInvite(goal) { return goal.type === "family" && isOwner(goal); }
 function canDelete(goal) { return isOwner(goal); }
@@ -635,11 +646,12 @@ function switchTab(tab) {
 // 渲染主函数
 function render() {
   const data = loadLocalData();
+  const userId = getUserId();
   currentUser = getUser();
   document.getElementById("displayName").textContent = currentUser;
   
-  // 只显示当前用户有权限看到的计划
-  const myGoals = data.goals.filter(g => canView(g, currentUser));
+  // 只显示当前用户有权限看到的计划（使用userId检查）
+  const myGoals = data.goals.filter(g => canView(g, userId));
   const total = myGoals.reduce((s, g) => s + getSaved(g.id, data.records), 0);
   document.getElementById("statTotal").textContent = fmtMoney(total);
   document.getElementById("statCount").textContent = myGoals.length;
@@ -768,6 +780,7 @@ function openInvite(gid) {
     target: goal.target,
     months: goal.months,
     monthly: goal.monthly,
+    ownerId: goal.ownerId,
     owner: goal.owner
   };
   
@@ -826,6 +839,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     const data = loadLocalData();
+    const userId = getUserId();
     const g = {
       id: genId(),
       name: name,
@@ -833,7 +847,9 @@ document.addEventListener("DOMContentLoaded", function() {
       months: months,
       monthly: (target / months).toFixed(2),
       type: type,
+      ownerId: userId,
       owner: currentUser,
+      memberIds: [],
       members: [],
       createdAt: new Date().toISOString()
     };
@@ -908,6 +924,9 @@ document.addEventListener("DOMContentLoaded", function() {
         return;
       }
       
+      const userId = getUserId();
+      
+      // 先添加计划到本地
       data.goals.push({
         id: share.planId,
         name: share.name,
@@ -915,15 +934,48 @@ document.addEventListener("DOMContentLoaded", function() {
         months: share.months,
         monthly: share.monthly,
         type: "family",
+        ownerId: share.ownerId || share.owner,
         owner: share.owner,
+        memberIds: [userId],
         members: [currentUser],
         joinedAt: new Date().toISOString()
       });
       
       saveLocalData(data);
       
-      if (isOnline) {
-        await uploadToCloud(share.planId);
+      // 关键：立即从云端拉取完整数据（包括历史记录）
+      if (isOnline && db) {
+        try {
+          const snapshot = await db.ref("plans/" + share.planId).once("value");
+          const cloudData = snapshot.val();
+          if (cloudData) {
+            // 更新计划数据
+            const idx = data.goals.findIndex(g => g.id === share.planId);
+            if (idx >= 0 && cloudData.goal) {
+              data.goals[idx] = cloudData.goal;
+              // 确保当前用户在成员列表中
+              if (!data.goals[idx].memberIds) data.goals[idx].memberIds = [];
+              if (!data.goals[idx].memberIds.includes(userId)) {
+                data.goals[idx].memberIds.push(userId);
+              }
+              if (!data.goals[idx].members) data.goals[idx].members = [];
+              if (!data.goals[idx].members.includes(currentUser)) {
+                data.goals[idx].members.push(currentUser);
+              }
+            }
+            // 合并历史记录
+            if (cloudData.records) {
+              cloudData.records.forEach(r => { 
+                if (!data.records.find(x => x.id === r.id)) data.records.push(r); 
+              });
+            }
+            saveLocalData(data);
+            showToast("📥 已同步历史数据");
+          }
+        } catch(err) {
+          console.log("拉取历史数据失败:", err);
+        }
+        // 启动实时同步
         startSync(share.planId);
       }
       
