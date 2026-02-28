@@ -477,6 +477,13 @@ body {
 
 <script>
 // ==================== Firebase 配置 ====================
+// 全局变量定义 - 必须在所有函数之前定义
+var db = null;
+var syncListeners = {};
+var isOnline = false;
+var currentTab = 'all';
+var currentUser = '我';
+
 const firebaseConfig = {
   apiKey: "AIzaSyDZtyTKPzqzCmgCaPlCF9UoeLCOGs3okO4",
   authDomain: "savingmoney-6d898.firebaseapp.com",
@@ -486,8 +493,6 @@ const firebaseConfig = {
   messagingSenderId: "364582624609",
   appId: "1:364582624609:web:f6077a7012b59f44fe7920"
 };
-
-let db = null, syncListeners = {}, isOnline = false;
 try {
   firebase.initializeApp(firebaseConfig);
   db = firebase.database();
@@ -496,7 +501,6 @@ try {
 
 const STORAGE_KEY = "savings_v12_data";
 const USER_KEY = "savings_v12_user";
-let currentTab = "all", currentUser = "我";
 
 // 状态更新
 function updateStatus(status, msg) {
