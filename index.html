@@ -473,7 +473,7 @@ body {
 </div>
 
 <div class="toast" id="toast"></div>
-<div class="version-tag">v12.0 完美版</div>
+<div class="version-tag">v14.0 完美修复版</div>
 
 <script>
 // ==================== Firebase 配置 ====================
@@ -615,11 +615,15 @@ function getSaved(goalId, records) { return records.filter(r => r.goalId === goa
 
 // 权限检查 - 使用userId而不是用户名
 function canView(goal, userId) {
+  // 兼容旧数据：如果goal没有ownerId，使用owner（用户名）
+  const goalOwnerId = goal.ownerId || goal.owner;
   // 私人计划：只有创建者可见
-  if (goal.type === "private") return goal.ownerId === userId;
+  if (goal.type === "private") return goalOwnerId === userId || goal.owner === currentUser;
   // 家庭计划：创建者和成员可见
-  if (goal.ownerId === userId) return true;
+  if (goalOwnerId === userId) return true;
+  if (goal.owner === currentUser) return true;
   if (goal.memberIds && goal.memberIds.includes(userId)) return true;
+  if (goal.members && goal.members.includes(currentUser)) return true;
   return false;
 }
 function isOwner(goal) { return goal.ownerId === getUserId(); }
