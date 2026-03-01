@@ -3,276 +3,1025 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>💵 存钱小工具 - v15 成就版</title>
+<title>💵 存钱小工具 - 完美版</title>
 <meta name="theme-color" content="#1b5e20">
+<link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 50%, #388e3c 100%); background-attachment: fixed; min-height: 100vh; color: #333; line-height: 1.6; }
+body { 
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 50%, #388e3c 100%);
+  background-attachment: fixed;
+  min-height: 100vh; color: #333; line-height: 1.6;
+}
 .container { max-width: 800px; margin: 0 auto; padding: 20px; padding-bottom: 100px; }
+
+/* Header */
 .header { text-align: center; padding: 30px 20px; }
 .header h1 { color: white; font-size: 2.2rem; font-weight: 700; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-.status-bar { background: rgba(255,255,255,0.15); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.2); padding: 12px 20px; border-radius: 50px; margin-bottom: 20px; color: white; font-size: 0.9rem; text-align: center; }
-.user-bar { background: rgba(255,255,255,0.15); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.2); padding: 15px 25px; border-radius: 50px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; color: white; flex-wrap: wrap; gap: 10px; }
-.user-avatar { width: 44px; height: 44px; background: linear-gradient(135deg, #ffd700, #ffb300); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
-.stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
-.stat-card { background: rgba(255,255,255,0.15); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.2); padding: 25px; border-radius: 20px; text-align: center; color: white; }
+.header p { color: rgba(255,255,255,0.8); margin-top: 8px; }
+
+/* Status Bar */
+.status-bar {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 12px 20px;
+  border-radius: 50px;
+  margin-bottom: 20px;
+  color: white;
+  font-size: 0.9rem;
+  text-align: center;
+}
+.status-bar.online { background: rgba(76, 175, 80, 0.4); }
+.status-bar.offline { background: rgba(255, 100, 100, 0.3); }
+
+/* User Bar */
+.user-bar {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 15px 25px;
+  border-radius: 50px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.user-info { display: flex; align-items: center; gap: 12px; }
+.user-avatar {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, #ffd700, #ffb300);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+}
+.user-name span { color: #ffd700; font-weight: 700; }
+.user-actions { display: flex; gap: 10px; }
+.btn-icon {
+  background: rgba(255,255,255,0.2);
+  border: none; color: white;
+  padding: 10px 18px;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.btn-icon:hover { background: rgba(255,255,255,0.3); }
+
+/* Stats */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 15px; margin-bottom: 20px;
+}
+.stat-card {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 25px;
+  border-radius: 20px;
+  text-align: center; color: white;
+}
 .stat-value { font-size: 2rem; font-weight: 700; color: #ffd700; }
-.glass-card { background: white; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-.btn { background: linear-gradient(135deg, #1b5e20, #4caf50); color: white; border: none; padding: 14px 28px; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
-.btn-gold { background: linear-gradient(135deg, #ffd700, #ffb300); color: #1b5e20; }
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+.stat-label { font-size: 0.9rem; opacity: 0.9; margin-top: 5px; }
+
+/* Cards */
+.glass-card {
+  background: white;
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+.card-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px;
+}
+.card-title-icon {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, #1b5e20, #4caf50);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem;
+}
+.card-title { font-size: 1.2rem; font-weight: 700; color: #333; }
+
+/* Form */
+.form-group { margin-bottom: 18px; }
+.form-label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+.form-input, .form-select {
+  width: 100%; padding: 14px 18px;
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  font-size: 1rem;
+}
+.form-input:focus, .form-select:focus {
+  outline: none; border-color: #1b5e20;
+  box-shadow: 0 0 0 4px rgba(27,94,32,0.1);
+}
+.btn {
+  background: linear-gradient(135deg, #1b5e20, #4caf50);
+  color: white; border: none;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 1rem; font-weight: 600;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.btn:hover { opacity: 0.9; }
+.btn-gold {
+  background: linear-gradient(135deg, #ffd700, #ffb300);
+  color: #1b5e20;
+}
+.btn-outline { background: white; border: 2px solid #1b5e20; color: #1b5e20; }
+.btn-outline:hover { background: #1b5e20; color: white; }
+.btn-danger { background: linear-gradient(135deg, #f44336, #e53935); }
+.btn-small { padding: 10px 16px; font-size: 0.9rem; }
+
+/* Tabs */
+.tabs {
+  display: flex; gap: 10px; margin-bottom: 20px;
+  padding: 5px; background: #f5f5f5;
+  border-radius: 50px;
+}
+.tab {
+  flex: 1; padding: 12px;
+  border: none; background: transparent;
+  border-radius: 25px;
+  font-weight: 600; color: #666;
+  cursor: pointer;
+}
+.tab.active { background: white; color: #1b5e20; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+
+/* Goal Cards */
+.goal-card {
+  background: #f8f9fa;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 15px;
+  border-left: 4px solid transparent;
+}
+.goal-card.private { border-left-color: #2196F3; }
+.goal-card.family { border-left-color: #ff9800; background: linear-gradient(135deg, #fffde7, #fff8e1); }
+.goal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+.goal-title { font-size: 1.15rem; font-weight: 700; }
+.badge {
+  padding: 6px 12px; border-radius: 20px;
+  font-size: 0.8rem; font-weight: 600;
+}
+.badge-private { background: #e3f2fd; color: #1976d2; }
+.badge-family { background: #fff3e0; color: #f57c00; }
+.badge-sync { background: #e8f5e9; color: #388e3c; margin-left: 8px; }
+
+.members { display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap; }
+.member-tag {
+  padding: 6px 14px; background: white;
+  border-radius: 20px; font-size: 0.85rem;
+}
+.member-tag.me { background: #1b5e20; color: white; }
+.member-tag.owner { background: linear-gradient(135deg, #ff9800, #ffb74d); color: white; }
+
+.progress-bar {
+  height: 12px; background: #e0e0e0;
+  border-radius: 10px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #1b5e20, #4caf50, #ffd700);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+.goal-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 10px; margin: 15px 0;
+  padding: 15px; background: white;
+  border-radius: 12px;
+}
+.stat-item { text-align: center; }
+.stat-item-value { font-weight: 700; color: #333; font-size: 0.95rem; }
+.stat-item-label { font-size: 0.75rem; color: #888; margin-top: 2px; }
+.goal-actions { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+
+/* Records */
+.record-item {
+  display: flex; align-items: center;
+  padding: 15px; background: #f8f9fa;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  border-left: 3px solid #4caf50;
+}
+.record-icon {
+  width: 48px; height: 48px;
+  background: linear-gradient(135deg, #1b5e20, #4caf50);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; margin-right: 15px;
+}
+.record-amount { font-size: 1.1rem; font-weight: 700; color: #1b5e20; }
+.record-meta { font-size: 0.85rem; color: #888; margin-top: 3px; }
+.record-date { margin-left: auto; font-size: 0.8rem; color: #aaa; }
+
+/* Empty State */
+.empty-state { text-align: center; padding: 40px; color: #999; }
+.empty-state-icon { font-size: 3rem; margin-bottom: 10px; }
+
+/* Modal */
+.modal {
+  display: none; position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(5px);
+  justify-content: center; align-items: center;
+  z-index: 1000; padding: 20px;
+}
 .modal.active { display: flex; }
-.modal-content { background: white; border-radius: 20px; width: 100%; max-width: 450px; max-height: 90vh; overflow-y: auto; }
-.modal-content.wide { max-width: 600px; }
-.toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px); background: #333; color: white; padding: 15px 25px; border-radius: 50px; font-size: 0.95rem; z-index: 2000; opacity: 0; transition: all 0.3s; }
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  width: 100%; max-width: 450px;
+  max-height: 90vh; overflow-y: auto;
+}
+.modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 25px; border-bottom: 1px solid #e8e8e8;
+}
+.modal-close {
+  width: 36px; height: 36px;
+  border: none; background: #f5f5f5;
+  border-radius: 50%; font-size: 1.5rem;
+  cursor: pointer;
+}
+.modal-body { padding: 25px; }
+.share-box {
+  background: #f8f9fa; border: 2px dashed #ccc;
+  border-radius: 12px;
+  padding: 20px; font-family: monospace;
+  font-size: 0.85rem; word-break: break-all;
+  margin: 15px 0;
+}
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 100px; left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: #333; color: white;
+  padding: 15px 25px; border-radius: 50px;
+  font-size: 0.95rem; z-index: 2000;
+  opacity: 0; transition: all 0.3s;
+}
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-.version-tag { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.7); padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; }
-.achievement-preview { background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,179,0,0.1)); border-radius: 16px; padding: 15px; margin: 15px 0; border: 2px dashed #ffd700; }
-.achievement-badge-preview { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #ffd700, #ffb300); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; flex-shrink: 0; box-shadow: 0 4px 15px rgba(255,215,0,0.4); cursor: pointer; }
-.achievements-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
-.achievement-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); position: relative; }
-.achievement-card.unlocked { background: linear-gradient(135deg, #fffde7, #fff9c4); border: 2px solid #ffd700; }
-.achievement-card.locked { opacity: 0.6; filter: grayscale(0.5); }
-.achievement-celebration { text-align: center; padding: 30px; }
-.achievement-celebration-icon { font-size: 5rem; margin-bottom: 15px; animation: bounce 1s infinite; }
-@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
-.poster-container { background: linear-gradient(135deg, #fffde7, #fff9c4); border-radius: 20px; padding: 30px; text-align: center; }
+
+.version-tag {
+  position: fixed; bottom: 15px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.7);
+  padding: 6px 16px; border-radius: 20px;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .goal-stats { grid-template-columns: repeat(2, 1fr); }
+  .user-bar { flex-direction: column; text-align: center; }
+  .user-actions { width: 100%; justify-content: center; }
+}
 </style>
 </head>
 <body>
 <div class="container">
-  <header class="header"><h1>💵 存钱小工具</h1><p>🏆 家庭储蓄里程碑成就系统</p></header>
-  <div class="status-bar" id="statusBar">🔄 正在连接...</div>
+  <header class="header">
+    <h1>💵 存钱小工具</h1>
+    <p>让存钱成为一种享受</p>
+  </header>
+  
+  <div class="status-bar" id="statusBar">🔄 正在连接 SavingMoney...</div>
+  
   <div class="user-bar">
-    <div class="user-info"><div class="user-avatar">👤</div><div>我是 <span id="displayName">我</span></div></div>
-    <div><button class="btn" onclick="showModal('joinModal')" style="padding:10px 20px">👋 加入家庭计划</button></div>
+    <div class="user-info">
+      <div class="user-avatar">👤</div>
+      <div class="user-name">我是 <span id="displayName">我</span></div>
+    </div>
+    <div class="user-actions">
+      <button class="btn-icon" onclick="showModal('userModal')">✏️ 改名</button>
+      <button class="btn-icon" onclick="showModal('joinModal')">👋 加入家庭计划</button>
+    </div>
   </div>
+  
   <div class="stats-grid">
-    <div class="stat-card"><div class="stat-value" id="statTotal">¥0</div><div class="stat-label">总存款</div></div>
-    <div class="stat-card"><div class="stat-value" id="statCount">0</div><div class="stat-label">我的计划</div></div>
+    <div class="stat-card">
+      <div class="stat-value" id="statTotal">¥0</div>
+      <div class="stat-label">总存款</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statCount">0</div>
+      <div class="stat-label">我的计划</div>
+    </div>
   </div>
-  <div class="glass-card">
-    <h3 style="margin-bottom:15px">🎯 新建计划</h3>
+  
+  <!-- 新建计划表单 -->
+  <div class="glass-card" id="createPlanCard">
+    <div class="card-header">
+      <div class="card-title-icon">🎯</div>
+      <div class="card-title">新建存钱计划</div>
+    </div>
     <form id="createForm">
-      <input type="text" id="gName" placeholder="计划名称" required style="width:100%;padding:12px;margin-bottom:10px;border:1px solid #ddd;border-radius:8px;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-        <input type="number" id="gTarget" placeholder="目标金额" min="1" required style="padding:12px;border:1px solid #ddd;border-radius:8px;">
-        <input type="number" id="gMonths" placeholder="时长(月)" min="1" required style="padding:12px;border:1px solid #ddd;border-radius:8px;">
+      <div class="form-group">
+        <label class="form-label">计划名称</label>
+        <input type="text" class="form-input" id="gName" placeholder="例如：买新车、旅行基金" required>
       </div>
-      <select id="gType" style="width:100%;padding:12px;margin-bottom:10px;border:1px solid #ddd;border-radius:8px;">
-        <option value="private">🔒 私人计划</option>
-        <option value="family">👨‍👩‍👧‍👦 家庭计划</option>
-      </select>
-      <button type="submit" class="btn">✨ 创建</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px">
+        <div class="form-group">
+          <label class="form-label">目标金额 (¥)</label>
+          <input type="number" class="form-input" id="gTarget" placeholder="100000" min="1" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">计划时长（月）</label>
+          <input type="number" class="form-input" id="gMonths" placeholder="24" min="1" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">计划类型</label>
+        <select class="form-select" id="gType">
+          <option value="private">🔒 私人计划 - 仅自己可见和管理</option>
+          <option value="family">👨‍👩‍👧‍👦 家庭计划 - 多人共享，实时同步</option>
+        </select>
+      </div>
+      <button type="submit" class="btn">✨ 创建计划</button>
     </form>
   </div>
-  <div id="goalsList"></div>
+  
+  <!-- 计划列表 -->
+  <div class="glass-card">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('all')">📋 全部</button>
+      <button class="tab" onclick="switchTab('private')">🔒 私人</button>
+      <button class="tab" onclick="switchTab('family')">👨‍👩‍👧‍👦 家庭</button>
+    </div>
+    <div id="goalsList">
+      <div class="empty-state">
+        <div class="empty-state-icon">📝</div>
+        <div>还没有计划，在上方创建一个吧！</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 最近记录 -->
+  <div class="glass-card">
+    <div class="card-header">
+      <div class="card-title-icon">📝</div>
+      <div class="card-title">最近存入记录</div>
+    </div>
+    <div id="recordsList">
+      <div class="empty-state">
+        <div class="empty-state-icon">💰</div>
+        <div>还没有记录</div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="modal" id="depositModal"><div class="modal-content"><div style="padding:20px;border-bottom:1px solid #eee"><strong>💰 存入金额</strong><button onclick="closeModal('depositModal')" style="float:right;border:none;background:none;font-size:1.5rem;cursor:pointer">&times;</button></div><div class="modal-body"><form id="depositForm"><input type="hidden" id="dGoalId"><input type="text" id="dGoalName" readonly style="width:100%;padding:12px;margin-bottom:10px;border:1px solid #ddd;border-radius:8px;background:#f5f5f5;"><input type="number" id="dAmount" placeholder="存入金额" min="1" required style="width:100%;padding:12px;margin-bottom:10px;border:1px solid #ddd;border-radius:8px;"><button type="submit" class="btn btn-gold" style="width:100%">💾 确认存入</button></form></div></div></div>
-<div class="modal" id="achievementsModal"><div class="modal-content wide"><div style="padding:20px;border-bottom:1px solid #eee"><strong>🏆 家庭成就墙</strong><button onclick="closeModal('achievementsModal')" style="float:right;border:none;background:none;font-size:1.5rem;cursor:pointer">&times;</button></div><div class="modal-body" id="achievementsWallContent"></div></div></div>
-<div class="modal" id="celebrationModal"><div class="modal-content"><div class="modal-body" id="celebrationContent"></div></div></div>
-<div class="modal" id="posterModal"><div class="modal-content wide"><div style="padding:20px;border-bottom:1px solid #eee"><strong>🎨 荣誉海报</strong><button onclick="closeModal('posterModal')" style="float:right;border:none;background:none;font-size:1.5rem;cursor:pointer">&times;</button></div><div class="modal-body"><div id="posterContainer" class="poster-container"></div><div style="display:flex;gap:10px;margin-top:20px"><button class="btn" style="flex:1" onclick="downloadPoster()">💾 保存</button><button class="btn" style="flex:1;background:#666" onclick="closeModal('posterModal')">关闭</button></div></div></div></div>
-<div class="modal" id="joinModal"><div class="modal-content"><div style="padding:20px;border-bottom:1px solid #eee"><strong>👋 加入家庭计划</strong><button onclick="closeModal('joinModal')" style="float:right;border:none;background:none;font-size:1.5rem;cursor:pointer">&times;</button></div><div class="modal-body"><form id="joinForm"><textarea id="joinCode" placeholder="粘贴分享码..." rows="4" style="width:100%;padding:12px;margin-bottom:10px;border:1px solid #ddd;border-radius:8px;resize:none;" required></textarea><button type="submit" class="btn" style="width:100%">🚀 立即加入</button></form></div></div></div>
+<!-- 存入模态框 -->
+<div class="modal" id="depositModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div style="font-size:1.2rem;font-weight:700">💰 存入金额</div>
+      <button class="modal-close" onclick="closeModal('depositModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="depositForm">
+        <input type="hidden" id="dGoalId">
+        <div class="form-group">
+          <label class="form-label">计划名称</label>
+          <input type="text" class="form-input" id="dGoalName" readonly style="background:#f5f5f5">
+        </div>
+        <div class="form-group">
+          <label class="form-label">存入金额 (¥)</label>
+          <input type="number" class="form-input" id="dAmount" placeholder="5000" min="1" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">备注（可选）</label>
+          <input type="text" class="form-input" id="dNote" placeholder="例如：本月工资结余">
+        </div>
+        <button type="submit" class="btn btn-gold" style="width:100%">💾 确认存入</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 邀请模态框 -->
+<div class="modal" id="inviteModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div style="font-size:1.2rem;font-weight:700">🔗 邀请家人加入</div>
+      <button class="modal-close" onclick="closeModal('inviteModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:#666;margin-bottom:15px">复制分享码给家人：</p>
+      <div class="share-box" id="inviteCode"></div>
+      <button class="btn" onclick="copyInviteCode()" style="width:100%">📋 复制分享码</button>
+      <div style="margin-top:20px;padding:15px;background:#e3f2fd;border-radius:12px;font-size:0.9rem;color:#555">
+        <strong>💡 使用方法：</strong><br>
+        1. 家人点击"加入家庭计划"按钮<br>
+        2. 粘贴此分享码<br>
+        3. 加入后数据实时同步
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 加入家庭计划模态框 -->
+<div class="modal" id="joinModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div style="font-size:1.2rem;font-weight:700">👋 加入家庭计划</div>
+      <button class="modal-close" onclick="closeModal('joinModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:#666;margin-bottom:15px">粘贴家人给你的分享码：</p>
+      <form id="joinForm">
+        <div class="form-group">
+          <label class="form-label">分享码</label>
+          <textarea class="form-input" id="joinCode" rows="4" placeholder="请粘贴分享码..." required></textarea>
+        </div>
+        <button type="submit" class="btn" style="width:100%">🚀 立即加入并同步</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 改名模态框 -->
+<div class="modal" id="userModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div style="font-size:1.2rem;font-weight:700">✏️ 设置显示名称</div>
+      <button class="modal-close" onclick="closeModal('userModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="userForm">
+        <div class="form-group">
+          <label class="form-label">你的名字（会显示在存入记录中）</label>
+          <input type="text" class="form-input" id="userNameInput" placeholder="例如：爸爸、妈妈、小明" required>
+        </div>
+        <button type="submit" class="btn" style="width:100%">💾 保存</button>
+      </form>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
-<div class="version-tag">v15.0 成就版</div>
+<div class="version-tag">v14.0 完美修复版</div>
 
 <script>
-var db = null, currentUser = '我';
-const STORAGE_KEY = "savings_v15_data";
-const USER_KEY = "savings_v15_user";
-const USER_ID_KEY = "savings_v15_userid";
-
-var ACHIEVEMENT_DEFS = [
-  { type: 'first_thousand', threshold: 1000, name: '第一桶金', desc: '总储蓄达¥1,000', icon: '🥉' },
-  { type: 'five_thousand', threshold: 5000, name: '小有所成', desc: '总储蓄达¥5,000', icon: '🥈' },
-  { type: 'ten_thousand', threshold: 10000, name: '万元户', desc: '总储蓄达¥10,000', icon: '🥇' },
-  { type: 'twenty_thousand', threshold: 20000, name: '稳健前行', desc: '总储蓄达¥20,000', icon: '💎' },
-  { type: 'fifty_thousand', threshold: 50000, name: '财富达人', desc: '总储蓄达¥50,000', icon: '👑' }
-];
+// ==================== Firebase 配置 ====================
+// 全局变量定义 - 必须在所有函数之前定义
+var db = null;
+var syncListeners = {};
+var isOnline = false;
+var currentTab = 'all';
+var currentUser = '我';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDZtyTKPzqzCmgCaPlCF9UoeLCOGs3okO4",
   authDomain: "savingmoney-6d898.firebaseapp.com",
   databaseURL: "https://savingmoney-6d898-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "savingmoney-6d898",
+  storageBucket: "savingmoney-6d898.firebasestorage.app",
+  messagingSenderId: "364582624609",
   appId: "1:364582624609:web:f6077a7012b59f44fe7920"
 };
-try { firebase.initializeApp(firebaseConfig); db = firebase.database(); } catch(e) {}
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+  console.log("Firebase initialized");
+} catch(e) { console.log("Firebase init failed:", e); }
 
-function showToast(msg) { var t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(function() { t.classList.remove("show"); }, 3000); }
-function getUserId() { var id = localStorage.getItem(USER_ID_KEY); if (!id) { id = 'user_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5); localStorage.setItem(USER_ID_KEY, id); } return id; }
+const STORAGE_KEY = "savings_v12_data";
+const USER_KEY = "savings_v12_user";
+const USER_ID_KEY = "savings_v12_userid";
+
+// 获取或创建用户ID（设备唯一标识，不随改名改变）
+function getUserId() {
+  let userId = localStorage.getItem(USER_ID_KEY);
+  if (!userId) {
+    userId = 'user_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    localStorage.setItem(USER_ID_KEY, userId);
+  }
+  return userId;
+}
+
+// 状态更新
+function updateStatus(status, msg) {
+  const bar = document.getElementById("statusBar");
+  bar.className = "status-bar " + status;
+  bar.textContent = msg;
+}
+
+// Firebase连接状态
+if (db) {
+  db.ref(".info/connected").on("value", snap => {
+    isOnline = snap.val() === true;
+    if (isOnline) {
+      updateStatus("online", "🟢 已连接到 SavingMoney 云端，数据实时同步中");
+      const data = loadLocalData();
+      data.goals.filter(g => g.type === "family").forEach(g => startSync(g.id));
+    } else {
+      updateStatus("offline", "🔴 离线模式 - 数据保存在本地");
+    }
+  });
+} else {
+  updateStatus("offline", "❌ 无法连接服务器");
+}
+
+// Toast提示
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+// 数据操作
 function getUser() { return localStorage.getItem(USER_KEY) || "我"; }
-function loadLocalData() { try { var d = localStorage.getItem(STORAGE_KEY); return d ? JSON.parse(d) : { goals: [], records: [], achievements: [] }; } catch(e) { return { goals: [], records: [], achievements: [] }; } }
-function saveLocalData(data) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); return true; } catch(e) { return false; } }
+function setUser(name) { currentUser = name || "我"; localStorage.setItem(USER_KEY, currentUser); }
+function loadLocalData() {
+  try { 
+    const d = localStorage.getItem(STORAGE_KEY); 
+    return d ? JSON.parse(d) : { goals: [], records: [] }; 
+  } catch(e) { return { goals: [], records: [] }; }
+}
+function saveLocalData(data) {
+  try { 
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); 
+    return true; 
+  } catch(e) { 
+    showToast("保存失败"); 
+    return false; 
+  }
+}
+
+// 上传到云端
+function uploadToCloud(goalId) {
+  if (!db || !isOnline) return Promise.resolve();
+  const data = loadLocalData();
+  const goal = data.goals.find(g => g.id === goalId);
+  const records = data.records.filter(r => r.goalId === goalId);
+  if (!goal) return Promise.resolve();
+  return db.ref("plans/" + goalId).set({ 
+    goal: goal, 
+    records: records, 
+    lastUpdate: Date.now() 
+  }).then(() => console.log("Uploaded:", goalId))
+  .catch(err => console.log("Upload error:", err));
+}
+
+// 开始同步
+function startSync(goalId) {
+  if (!db || syncListeners[goalId]) return;
+  const ref = db.ref("plans/" + goalId);
+  syncListeners[goalId] = ref.on("value", snapshot => {
+    const cloud = snapshot.val();
+    if (!cloud) return;
+    const local = loadLocalData();
+    const idx = local.goals.findIndex(g => g.id === goalId);
+    if (idx >= 0) {
+      local.goals[idx] = cloud.goal;
+      if (cloud.records) {
+        cloud.records.forEach(r => { 
+          if (!local.records.find(x => x.id === r.id)) local.records.push(r); 
+        });
+      }
+      saveLocalData(local);
+      render();
+      showToast("📥 数据已同步更新");
+    }
+  });
+}
+
+function stopSync(goalId) {
+  if (syncListeners[goalId] && db) {
+    db.ref("plans/" + goalId).off("value", syncListeners[goalId]);
+    delete syncListeners[goalId];
+  }
+}
+
+// 工具函数
 function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 6); }
-function fmtMoney(n) { return "¥" + parseFloat(n||0).toLocaleString("zh-CN"); }
-function getSaved(goalId, records) { return records.filter(function(r) { return r.goalId === goalId; }).reduce(function(s, r) { return s + (parseFloat(r.amount)||0); }, 0); }
+function fmtMoney(n) { return "¥" + parseFloat(n).toLocaleString("zh-CN", {maximumFractionDigits:0}); }
+function getSaved(goalId, records) { return records.filter(r => r.goalId === goalId).reduce((s, r) => s + r.amount, 0); }
+
+// 权限检查 - 使用userId而不是用户名
+function canView(goal, userId) {
+  // 兼容旧数据：如果goal没有ownerId，使用owner（用户名）
+  const goalOwnerId = goal.ownerId || goal.owner;
+  // 私人计划：只有创建者可见
+  if (goal.type === "private") return goalOwnerId === userId || goal.owner === currentUser;
+  // 家庭计划：创建者和成员可见
+  if (goalOwnerId === userId) return true;
+  if (goal.owner === currentUser) return true;
+  if (goal.memberIds && goal.memberIds.includes(userId)) return true;
+  if (goal.members && goal.members.includes(currentUser)) return true;
+  return false;
+}
+function isOwner(goal) { return goal.ownerId === getUserId(); }
+function canDeposit(goal) { 
+  // 私人：只有创建者可存入
+  // 家庭：所有可见成员（创建者和加入的成员）都可存入
+  return goal.type === "private" ? isOwner(goal) : canView(goal, getUserId()); 
+}
+function canInvite(goal) { return goal.type === "family" && isOwner(goal); }
+function canDelete(goal) { return isOwner(goal); }
 function escapeHtml(t) { return t ? t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;") : ""; }
 function encodeShareCode(o) { return btoa(encodeURIComponent(JSON.stringify(o))); }
-function decodeShareCode(c) { try { return JSON.parse(decodeURIComponent(atob(c))); } catch(e) { return null; } }
+function decodeShareCode(c) { return JSON.parse(decodeURIComponent(atob(c))); }
+
+// 切换标签
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll(".tab").forEach(t => {
+    t.classList.toggle("active", t.textContent.includes(tab === 'all' ? '全部' : tab === 'private' ? '私人' : '家庭'));
+  });
+  render();
+}
+
+// 渲染主函数
+function render() {
+  const data = loadLocalData();
+  const userId = getUserId();
+  currentUser = getUser();
+  document.getElementById("displayName").textContent = currentUser;
+  
+  // 只显示当前用户有权限看到的计划（使用userId检查）
+  const myGoals = data.goals.filter(g => canView(g, userId));
+  const total = myGoals.reduce((s, g) => s + getSaved(g.id, data.records), 0);
+  document.getElementById("statTotal").textContent = fmtMoney(total);
+  document.getElementById("statCount").textContent = myGoals.length;
+  
+  // 按标签过滤
+  let visible = myGoals;
+  if (currentTab === "private") visible = myGoals.filter(g => g.type === "private");
+  if (currentTab === "family") visible = myGoals.filter(g => g.type === "family");
+  
+  // 渲染计划列表
+  const list = document.getElementById("goalsList");
+  if (visible.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><div>还没有计划，在上方创建一个吧！</div></div>';
+  } else {
+    list.innerHTML = visible.map(g => {
+      const saved = getSaved(g.id, data.records);
+      const pct = Math.min(100, (saved / g.target * 100)).toFixed(1);
+      const isDone = saved >= g.target;
+      const isFamily = g.type === "family";
+      const isSyncing = !!syncListeners[g.id];
+      
+      // 构建成员列表
+      let members = [];
+      if (isFamily) {
+        members = [g.owner];
+        if (g.members) g.members.forEach(m => { if (m !== g.owner) members.push(m); });
+      }
+      
+      let html = '<div class="goal-card ' + (isFamily ? 'family' : 'private') + '">';
+      html += '<div class="goal-header">';
+      html += '<div class="goal-title">' + escapeHtml(g.name) + '</div>';
+      html += '<div>';
+      html += '<span class="badge ' + (isFamily ? 'badge-family' : 'badge-private') + '">';
+      html += isFamily ? '👨‍👩‍👧‍👦 家庭' : '🔒 私人';
+      html += '</span>';
+      if (isFamily && isSyncing) html += '<span class="badge badge-sync">🔄 同步</span>';
+      html += '</div></div>';
+      
+      // 成员显示
+      if (isFamily && members.length > 0) {
+        html += '<div class="members">';
+        members.forEach(m => {
+          const isMe = m === currentUser;
+          const isOwn = m === g.owner;
+          html += '<span class="member-tag ' + (isMe ? 'me' : '') + ' ' + (isOwn ? 'owner' : '') + '">';
+          html += isMe ? '👤 我' : '👤 ' + escapeHtml(m);
+          if (isOwn) html += ' 👑';
+          html += '</span>';
+        });
+        html += '</div>';
+      }
+      
+      // 进度条
+      html += '<div style="margin:15px 0">';
+      html += '<div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.9rem;color:#666">';
+      html += '<span>进度 ' + pct + '%</span><span>' + (isDone ? '✅ 已完成' : '⏳ 进行中') + '</span>';
+      html += '</div>';
+      html += '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>';
+      html += '</div>';
+      
+      // 统计数据
+      html += '<div class="goal-stats">';
+      html += '<div class="stat-item"><div class="stat-item-value">' + fmtMoney(g.target) + '</div><div class="stat-item-label">目标</div></div>';
+      html += '<div class="stat-item"><div class="stat-item-value">' + fmtMoney(saved) + '</div><div class="stat-item-label">已存</div></div>';
+      html += '<div class="stat-item"><div class="stat-item-value">' + fmtMoney(Math.max(0, g.target - saved)) + '</div><div class="stat-item-label">剩余</div></div>';
+      html += '<div class="stat-item"><div class="stat-item-value">' + fmtMoney(parseFloat(g.monthly)) + '</div><div class="stat-item-label">每月</div></div>';
+      html += '</div>';
+      
+      // 操作按钮
+      html += '<div class="goal-actions">';
+      
+      // 存入按钮 - 所有可见成员都可以存入
+      if (canDeposit(g)) {
+        html += '<button type="button" class="btn btn-gold btn-small" onclick="openDeposit(\'' + g.id + '\',\'' + escapeHtml(g.name) + '\')">💰 存入</button>';
+      }
+      
+      // 邀请按钮 - 只有创建者可以邀请
+      if (canInvite(g)) {
+        html += '<button type="button" class="btn btn-outline btn-small" onclick="openInvite(\'' + g.id + '\')">🔗 邀请</button>';
+      }
+      
+      // 删除按钮 - 只有创建者可以删除
+      if (canDelete(g)) {
+        html += '<button type="button" class="btn btn-danger btn-small" onclick="deleteGoal(\'' + g.id + '\')">🗑️ 删除</button>';
+      }
+      
+      html += '</div></div>';
+      return html;
+    }).join('');
+  }
+  
+  // 渲染记录
+  const vids = myGoals.map(g => g.id);
+  const recs = data.records.filter(r => vids.includes(r.goalId)).sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 20);
+  const rlist = document.getElementById("recordsList");
+  if (recs.length === 0) {
+    rlist.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💰</div><div>还没有记录</div></div>';
+  } else {
+    rlist.innerHTML = recs.map(r => {
+      const goal = data.goals.find(g => g.id === r.goalId);
+      return '<div class="record-item"><div class="record-icon">💵</div><div style="flex:1"><div class="record-amount">+' + fmtMoney(r.amount) + '</div><div class="record-meta">' + (goal ? escapeHtml(goal.name) : '') + ' · ' + (r.who || '我') + (r.note ? ' · ' + escapeHtml(r.note) : '') + '</div></div><div class="record-date">' + r.date.slice(0, 10) + '</div></div>';
+    }).join('');
+  }
+}
+
+// 打开存入弹窗
+function openDeposit(gid, gname) {
+  document.getElementById("dGoalId").value = gid;
+  document.getElementById("dGoalName").value = gname;
+  document.getElementById("dAmount").value = "";
+  document.getElementById("dNote").value = "";
+  showModal("depositModal");
+}
+
+// 打开邀请弹窗
+function openInvite(gid) {
+  const data = loadLocalData();
+  const goal = data.goals.find(g => g.id === gid);
+  if (!goal) { showToast("找不到该计划"); return; }
+  
+  const share = {
+    type: "savings_v4",
+    version: 4,
+    planId: goal.id,
+    name: goal.name,
+    target: goal.target,
+    months: goal.months,
+    monthly: goal.monthly,
+    ownerId: goal.ownerId,
+    owner: goal.owner
+  };
+  
+  try {
+    const code = encodeShareCode(share);
+    document.getElementById("inviteCode").textContent = code;
+    showModal("inviteModal");
+  } catch (err) {
+    showToast("生成邀请码失败：" + err.message);
+  }
+}
+
+// 复制邀请码
+function copyInviteCode() {
+  const code = document.getElementById("inviteCode").textContent;
+  if (!code) { showToast("没有邀请码可复制"); return; }
+  navigator.clipboard.writeText(code).then(() => {
+    showToast("✅ 邀请码已复制！请发给家人");
+  }).catch(() => {
+    showToast("复制失败，请手动复制");
+  });
+}
+
+// 删除计划
+function deleteGoal(gid) {
+  if (!confirm("确定删除此计划？此操作不可恢复！")) return;
+  const d = loadLocalData();
+  d.goals = d.goals.filter(g => g.id !== gid);
+  d.records = d.records.filter(r => r.goalId !== gid);
+  saveLocalData(d);
+  stopSync(gid);
+  render();
+  showToast("✅ 计划已删除");
+}
+
+// 弹窗控制
 function showModal(id) { document.getElementById(id).classList.add("active"); }
 function closeModal(id) { document.getElementById(id).classList.remove("active"); }
 
-function checkAchievements(goalId, userId, userName) {
-  var data = loadLocalData();
-  var total = getSaved(goalId, data.records);
-  var unlocked = [];
-  ACHIEVEMENT_DEFS.forEach(function(def) {
-    if (total >= def.threshold) {
-      var exists = data.achievements.find(function(a) { return a.planId === goalId && a.type === def.type; });
-      if (!exists) {
-        var ach = { id: genId(), planId: goalId, type: def.type, name: def.name, desc: def.desc, icon: def.icon, unlockedAt: new Date().toISOString(), unlockedBy: userId, unlockedByName: userName };
-        data.achievements.push(ach);
-        unlocked.push(ach);
-      }
-    }
-  });
-  if (unlocked.length > 0) {
-    saveLocalData(data);
-    showToast("🏆 解锁成就：" + unlocked[0].name);
-    showCelebration(unlocked[0]);
-  }
-  return unlocked;
-}
-
-function showCelebration(ach) {
-  var html = '<div class="achievement-celebration"><div class="achievement-celebration-icon">' + ach.icon + '</div><div style="font-size:1.5rem;font-weight:700;color:#1b5e20;margin-bottom:10px;">🎉 成就解锁！</div><div style="font-size:1.2rem;color:#666;margin:10px 0">家庭达成【' + ach.name + '】</div><div style="background:#f5f5f5;padding:15px;border-radius:12px;margin:15px 0"><div style="font-size:1.3rem;font-weight:700;color:#1b5e20">' + ach.name + '</div><div style="color:#666">' + ach.desc + '</div></div><button class="btn" onclick="closeModal(\'celebrationModal\');render()">查看成就</button></div>';
-  document.getElementById("celebrationContent").innerHTML = html;
-  showModal("celebrationModal");
-  setTimeout(function() { closeModal("celebrationModal"); }, 5000);
-}
-
-function renderAchievements(goalId) {
-  var data = loadLocalData();
-  var achs = data.achievements.filter(function(a) { return a.planId === goalId; });
-  if (achs.length === 0) return '<div class="achievement-preview"><div style="text-align:center;color:#999;padding:20px;">🎉 存入第一笔，解锁家庭成就！</div></div>';
-  var html = '<div class="achievement-preview"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-weight:700;color:#1b5e20;">🏆 家庭成就 <span style="background:linear-gradient(135deg,#ffd700,#ffb300);color:#1b5e20;padding:2px 10px;border-radius:15px;font-size:0.85rem;">' + achs.length + '</span></span><span style="color:#1b5e20;cursor:pointer;" onclick="showAchievementsWall(\'' + goalId + '\')">查看全部 →</span></div><div style="display:flex;gap:10px;overflow-x:auto;">';
-  achs.slice(0, 5).forEach(function(a) { html += '<div class="achievement-badge-preview" onclick="showAchievementsWall(\'' + goalId + '\')">' + a.icon + '</div>'; });
-  html += '</div></div>';
-  return html;
-}
-
-function showAchievementsWall(goalId) {
-  var data = loadLocalData();
-  var total = getSaved(goalId, data.records);
-  var achs = data.achievements.filter(function(a) { return a.planId === goalId; });
-  var html = '<div style="text-align:center;margin-bottom:20px;"><div style="font-size:1.2rem;font-weight:700;color:#1b5e20;">🏆 家庭成就墙</div><div style="color:#666;">当前储蓄：' + fmtMoney(total) + '</div></div>';
-  html += '<div class="achievements-grid">';
-  ACHIEVEMENT_DEFS.forEach(function(def) {
-    var u = achs.find(function(a) { return a.type === def.type; });
-    html += '<div class="achievement-card ' + (u ? 'unlocked' : 'locked') + '">';
-    html += '<div style="width:60px;height:60px;border-radius:50%;background:' + (u ? 'linear-gradient(135deg,#ffd700,#ffb300)' : '#e0e0e0') + ';display:flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:10px;">' + def.icon + '</div>';
-    html += '<div style="font-weight:700;">' + def.name + '</div>';
-    html += '<div style="font-size:0.85rem;color:#666;margin-bottom:10px;">' + def.desc + '</div>';
-    if (u) {
-      html += '<div style="font-size:0.75rem;color:#999;">' + new Date(u.unlockedAt).toLocaleDateString('zh-CN') + ' 解锁</div>';
-      html += '<button style="margin-top:10px;padding:8px 16px;background:#1b5e20;color:white;border:none;border-radius:20px;cursor:pointer;font-size:0.85rem;" onclick="showPoster(\'' + u.id + '\')">📤 分享海报</button>';
-    } else { html += '<div style="position:absolute;top:15px;right:15px;font-size:1.2rem;color:#999;">🔒</div>'; }
-    html += '</div>';
-  });
-  html += '</div>';
-  document.getElementById("achievementsWallContent").innerHTML = html;
-  showModal("achievementsModal");
-}
-
-function showPoster(achId) {
-  var data = loadLocalData();
-  var ach = data.achievements.find(function(a) { return a.id === achId; });
-  if (!ach) return;
-  var goal = data.goals.find(function(g) { return g.id === ach.planId; });
-  var total = getSaved(ach.planId, data.records);
-  var html = '<div style="font-size:4rem;margin-bottom:15px;">' + ach.icon + '</div><div style="font-size:1.8rem;font-weight:700;color:#1b5e20;margin-bottom:10px;">' + ach.name + '</div><div style="color:#666;margin-bottom:20px;">' + escapeHtml(goal.name) + '</div><div style="font-style:italic;color:#666;margin:20px 0;">"因为你们，家有了更大的意义"</div><div style="font-size:2rem;font-weight:700;color:#1b5e20;">' + fmtMoney(total) + '</div><div style="color:#666;font-size:0.9rem;">已累计储蓄</div>';
-  document.getElementById("posterContainer").innerHTML = html;
-  showModal("posterModal");
-}
-
-function downloadPoster() {
-  if (typeof html2canvas !== 'undefined') {
-    html2canvas(document.getElementById("posterContainer")).then(function(canvas) {
-      var link = document.createElement('a');
-      link.download = '存钱猪成就海报.png';
-      link.href = canvas.toDataURL();
-      link.click();
-      showToast("✅ 海报已保存");
-    });
-  } else { showToast("❌ 请稍后重试"); }
-}
-
-function render() {
-  var data = loadLocalData();
-  currentUser = getUser();
-  document.getElementById("displayName").textContent = currentUser;
-  var goals = data.goals.filter(function(g) { return g.ownerId === getUserId() || g.owner === currentUser || (g.memberIds && g.memberIds.includes(getUserId())) || (g.members && g.members.includes(currentUser)); });
-  document.getElementById("statTotal").textContent = fmtMoney(goals.reduce(function(s, g) { return s + getSaved(g.id, data.records); }, 0));
-  document.getElementById("statCount").textContent = goals.length;
-  var list = document.getElementById("goalsList");
-  if (goals.length === 0) { list.innerHTML = '<div class="glass-card" style="text-align:center;padding:40px;color:#999;">还没有计划，创建一个吧！</div>'; return; }
-  list.innerHTML = goals.map(function(g) {
-    var saved = getSaved(g.id, data.records);
-    var pct = Math.min(100, (saved / g.target * 100)).toFixed(1);
-    var isFamily = g.type === 'family';
-    var html = '<div class="glass-card" style="border-left:4px solid ' + (isFamily ? '#ff9800' : '#2196F3') + '">';
-    html += '<div style="display:flex;justify-content:space-between;margin-bottom:10px;"><span style="font-weight:700;">' + escapeHtml(g.name) + '</span><span style="background:' + (isFamily ? '#fff3e0;color:#f57c00' : '#e3f2fd;color:#1976d2') + ';padding:4px 12px;border-radius:20px;font-size:0.8rem;">' + (isFamily ? '👨‍👩‍👧‍👦 家庭' : '🔒 私人') + '</span></div>';
-    if (isFamily && g.members) { html += '<div style="display:flex;gap:5px;margin:10px 0;flex-wrap:wrap;">' + g.members.map(function(m) { return '<span style="padding:4px 12px;background:#f5f5f5;border-radius:20px;font-size:0.85rem;">' + (m === currentUser ? '👤 我' : escapeHtml(m)) + '</span>'; }).join('') + '</div>'; }
-    html += '<div style="margin:15px 0;"><div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:0.9rem;"><span>进度 ' + pct + '%</span><span>' + (saved >= g.target ? '✅ 已完成' : '⏳ 进行中') + '</span></div><div style="height:12px;background:#e0e0e0;border-radius:10px;overflow:hidden;"><div style="height:100%;background:linear-gradient(90deg,#1b5e20,#4caf50,#ffd700);border-radius:10px;width:' + pct + '%;"></div></div></div>';
-    html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:15px 0;padding:15px;background:white;border-radius:12px;font-size:0.85rem;text-align:center;"><div><div style="font-weight:700;">' + fmtMoney(g.target) + '</div><div style="color:#999;">目标</div></div><div><div style="font-weight:700;">' + fmtMoney(saved) + '</div><div style="color:#999;">已存</div></div><div><div style="font-weight:700;">' + fmtMoney(Math.max(0, g.target - saved)) + '</div><div style="color:#999;">剩余</div></div><div><div style="font-weight:700;">' + fmtMoney(g.monthly) + '</div><div style="color:#999;">每月</div></div></div>';
-    if (isFamily) html += renderAchievements(g.id);
-    html += '<div style="display:flex;gap:10px;margin-top:15px;"><button class="btn btn-gold" style="flex:1;" onclick="openDeposit(\'' + g.id + '\',\'' + escapeHtml(g.name) + '\')">💰 存入</button>' + (isFamily && g.owner === currentUser ? '<button class="btn" style="background:#ff9800;" onclick="openInvite(\'' + g.id + '\')">🔗 邀请</button>' : '') + '</div>';
-    html += '</div>';
-    return html;
-  }).join('');
-}
-
-function openDeposit(gid, gname) { document.getElementById("dGoalId").value = gid; document.getElementById("dGoalName").value = gname; document.getElementById("dAmount").value = ""; showModal("depositModal"); }
-function openInvite(gid) { var data = loadLocalData(); var goal = data.goals.find(function(g) { return g.id === gid; }); if (!goal) return; var share = { type: "savings_v4", version: 4, planId: goal.id, name: goal.name, target: goal.target, months: goal.months, monthly: goal.monthly, ownerId: goal.ownerId, owner: goal.owner }; document.getElementById("joinCode").value = encodeShareCode(share); showModal("joinModal"); }
-
+// 初始化事件监听
 document.addEventListener("DOMContentLoaded", function() {
-  render();
-  document.getElementById("createForm").addEventListener("submit", function(e) {
+  currentUser = getUser();
+  document.getElementById("userNameInput").value = currentUser;
+  
+  // 创建计划表单
+  document.getElementById("createForm").addEventListener("submit", async function(e) {
     e.preventDefault();
-    var name = document.getElementById("gName").value.trim();
-    var target = parseFloat(document.getElementById("gTarget").value);
-    var months = parseInt(document.getElementById("gMonths").value);
-    var type = document.getElementById("gType").value;
-    var data = loadLocalData();
-    data.goals.push({ id: genId(), name: name, target: target, months: months, monthly: (target/months).toFixed(2), type: type, ownerId: getUserId(), owner: currentUser, memberIds: [], members: type === 'family' ? [currentUser] : [], createdAt: new Date().toISOString() });
-    saveLocalData(data);
+    const name = document.getElementById("gName").value.trim();
+    const target = parseFloat(document.getElementById("gTarget").value);
+    const months = parseInt(document.getElementById("gMonths").value);
+    const type = document.getElementById("gType").value;
+    
+    if (!name || !target || !months) {
+      showToast("请填写完整信息");
+      return;
+    }
+    
+    const data = loadLocalData();
+    const userId = getUserId();
+    const g = {
+      id: genId(),
+      name: name,
+      target: target,
+      months: months,
+      monthly: (target / months).toFixed(2),
+      type: type,
+      ownerId: userId,
+      owner: currentUser,
+      memberIds: [],
+      members: [],
+      createdAt: new Date().toISOString()
+    };
+    
+    data.goals.push(g);
+    if (!saveLocalData(data)) return;
+    
+    // 上传到云端并同步
+    if (type === "family") {
+      await uploadToCloud(g.id);
+      if (isOnline) startSync(g.id);
+    }
+    
+    // 清空表单
+    document.getElementById("gName").value = "";
+    document.getElementById("gTarget").value = "";
+    document.getElementById("gMonths").value = "";
+    
     render();
-    showToast(type === 'family' ? "✅ 家庭计划创建成功！" : "✅ 私人计划创建成功！");
-    document.getElementById("createForm").reset();
+    showToast(type === "family" ? "✅ 家庭计划创建成功！点击邀请按钮分享" : "✅ 私人计划创建成功！");
   });
-  document.getElementById("depositForm").addEventListener("submit", function(e) {
+  
+  // 存入表单
+  document.getElementById("depositForm").addEventListener("submit", async function(e) {
     e.preventDefault();
-    var gid = document.getElementById("dGoalId").value;
-    var amount = parseFloat(document.getElementById("dAmount").value);
-    var data = loadLocalData();
-    var goal = data.goals.find(function(g) { return g.id === gid; });
-    data.records.push({ id: genId(), goalId: gid, amount: amount, who: currentUser, date: new Date().toISOString() });
+    const gid = document.getElementById("dGoalId").value;
+    const amount = parseFloat(document.getElementById("dAmount").value);
+    const note = document.getElementById("dNote").value;
+    
+    if (!amount || amount <= 0) {
+      showToast("请输入有效金额");
+      return;
+    }
+    
+    const data = loadLocalData();
+    const goal = data.goals.find(g => g.id === gid);
+    
+    data.records.push({
+      id: genId(),
+      goalId: gid,
+      amount: amount,
+      note: note,
+      who: currentUser,
+      date: new Date().toISOString()
+    });
+    
     saveLocalData(data);
-    if (goal && goal.type === 'family') checkAchievements(gid, getUserId(), currentUser);
+    
+    // 同步到云端
+    if (goal && goal.type === "family") {
+      await uploadToCloud(gid);
+    }
+    
     closeModal("depositModal");
     render();
-    showToast("✅ 存入成功！");
+    showToast(goal && goal.type === "family" ? "✅ 存入成功！已同步到云端" : "✅ 存入成功！");
   });
-  document.getElementById("joinForm").addEventListener("submit", function(e) {
+  
+  // 加入家庭计划表单
+  document.getElementById("joinForm").addEventListener("submit", async function(e) {
     e.preventDefault();
-    var code = document.getElementById("joinCode").value.trim();
-    var share = decodeShareCode(code);
-    if (!share || share.type !== "savings_v4") { showToast("❌ 无效的分享码"); return; }
-    var data = loadLocalData();
-    if (data.goals.find(function(g) { return g.id === share.planId; })) { showToast("⚠️ 已在此计划中"); return; }
-    data.goals.push({ id: share.planId, name: share.name, target: share.target, months: share.months, monthly: share.monthly, type: "family", ownerId: share.ownerId, owner: share.owner, memberIds: [getUserId()], members: [currentUser], joinedAt: new Date().toISOString() });
-    saveLocalData(data);
-    closeModal("joinModal");
-    render();
-    showToast("✅ 成功加入家庭计划！");
+    try {
+      const code = document.getElementById("joinCode").value.trim();
+      if (!code) { showToast("请输入分享码"); return; }
+      
+      const share = decodeShareCode(code);
+      if (share.type !== "savings_v4") throw new Error("无效的分享码格式");
+      
+      const data = loadLocalData();
+      if (data.goals.find(g => g.id === share.planId)) {
+        showToast("⚠️ 你已经在这个家庭计划中了！");
+        return;
+      }
+      
+      const userId = getUserId();
+      
+      // 先添加计划到本地
+      data.goals.push({
+        id: share.planId,
+        name: share.name,
+        target: share.target,
+        months: share.months,
+        monthly: share.monthly,
+        type: "family",
+        ownerId: share.ownerId || share.owner,
+        owner: share.owner,
+        memberIds: [userId],
+        members: [currentUser],
+        joinedAt: new Date().toISOString()
+      });
+      
+      saveLocalData(data);
+      
+      // 关键：立即从云端拉取完整数据（包括历史记录）
+      if (isOnline && db) {
+        try {
+          const snapshot = await db.ref("plans/" + share.planId).once("value");
+          const cloudData = snapshot.val();
+          if (cloudData) {
+            // 更新计划数据
+            const idx = data.goals.findIndex(g => g.id === share.planId);
+            if (idx >= 0 && cloudData.goal) {
+              // 保留当前用户在成员列表中
+              data.goals[idx] = cloudData.goal;
+              // 确保当前用户在成员列表中
+              if (!data.goals[idx].memberIds) data.goals[idx].memberIds = [];
+              if (!data.goals[idx].memberIds.includes(userId)) {
+                data.goals[idx].memberIds.push(userId);
+              }
+              if (!data.goals[idx].members) data.goals[idx].members = [];
+              if (!data.goals[idx].members.includes(currentUser)) {
+                data.goals[idx].members.push(currentUser);
+              }
+            }
+            // 合并历史记录
+            if (cloudData.records) {
+              cloudData.records.forEach(r => { 
+                if (!data.records.find(x => x.id === r.id)) data.records.push(r); 
+              });
+            }
+            saveLocalData(data);
+            showToast("📥 已同步历史数据");
+            
+            // 重要：加入者更新成员列表到云端（但不覆盖其他数据）
+            await db.ref("plans/" + share.planId + "/goal/memberIds").set(data.goals[idx].memberIds);
+            await db.ref("plans/" + share.planId + "/goal/members").set(data.goals[idx].members);
+          }
+        } catch(err) {
+          console.log("拉取历史数据失败:", err);
+        }
+        // 启动实时同步
+        startSync(share.planId);
+      }
+      
+      closeModal("joinModal");
+      document.getElementById("joinCode").value = "";
+      render();
+      showToast("✅ 成功加入家庭计划！现在可以一起存钱了");
+    } catch(err) {
+      showToast("❌ 加入失败：" + err.message);
+    }
   });
+  
+  // 改名表单
+  document.getElementById("userForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const name = document.getElementById("userNameInput").value.trim();
+    setUser(name || "我");
+    closeModal("userModal");
+    render();
+    showToast("✅ 名称已更新为：" + (name || "我"));
+  });
+  
+  // 点击模态框外部关闭
+  document.querySelectorAll(".modal").forEach(modal => {
+    modal.addEventListener("click", function(e) {
+      if (e.target === modal) closeModal(modal.id);
+    });
+  });
+  
+  // 初始渲染
+  render();
 });
+
+// Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
+}
 </script>
 </body>
 </html>
